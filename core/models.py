@@ -19,7 +19,7 @@ class Offer(models.Model):
 
 class Favorites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    offers = models.ForeignKey(Offer, on_delete=models.DO_NOTHING)
+    offers = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['user']
