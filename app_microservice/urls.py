@@ -5,6 +5,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from core import views
 
 router = routers.DefaultRouter()
+router.register(r'user', views.AuthViewSet, basename='user')
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
 router.register(r'offers', views.OfferViewSet)
