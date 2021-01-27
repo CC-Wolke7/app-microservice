@@ -1,15 +1,14 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Offer, Favorites
+from .models import WSUser, Offer, Favorites
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class WSUserSerializer(serializers.HyperlinkedModelSerializer):
 
     #offers = serializers.PrimaryKeyRelatedField(many=True, queryset=Offer.objects.all())
     #groups = serializers.PrimaryKeyRelatedField(many=True, queryset=Group.objects.all())
 
     class Meta:
-        model = User
+        model = WSUser
         fields = ['url', 'username', 'is_staff', 'email', 'offers']
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
