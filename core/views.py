@@ -17,6 +17,31 @@ class UserViewSet(viewsets.ModelViewSet):
     def exists(self, request, *args, **kwargs):
         return Response(self.queryset.filter(pk=self.get_object().pk).exists())
 
+
+class AuthViewSet(viewsets.ModelViewSet):
+    # queryset = User.objects.all()
+
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
+
+    def get_queryset(self):
+
+        try:
+            user_id = self.request.query_params.get('id')
+            queryset = User.objects.filter(id=user_id)
+
+        except User.DoesNotExist:
+            # todo
+            print('err')
+            queryset = User.objects.all()
+
+        # return token
+        return queryset
+
+    # def exists(self, request, *args, **kwargs):
+    #    return Response(self.get_queryset())
+
+
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
