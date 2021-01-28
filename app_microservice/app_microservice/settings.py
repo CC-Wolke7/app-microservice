@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': getenv('DJANGO_DATABASE_NAME'),
         'USER': getenv('DJANGO_DATABASE_USER'),
-        'PASSWORD': getenv('DJANGO_DATABASE_PASSWORD'),
+        'PASSWORD': getenv('DJANGO_DATABASE_PASSWORD', ''),
         'HOST': getenv('DJANGO_DATABASE_HOST'),
         'PORT': getenv('DJANGO_DATABASE_PORT'),
         'ATOMIC_REQUESTS': True,
