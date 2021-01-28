@@ -1,5 +1,6 @@
 from rest_framework import permissions
 
+
 class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
     """
     Custom permission to only allow owners of a resource or admins to edit it
@@ -10,8 +11,9 @@ class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Write permissions are only allowed to the owner of the resource or admins
+        # Write permissions are only allowed to the owner of the resource or admins # noqa
         return obj.published_by == request.user or request.user.is_staff
+
 
 class IsAdminOrOwner(permissions.BasePermission):
     """
@@ -19,5 +21,5 @@ class IsAdminOrOwner(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
 
-        # Write permissions are only allowed to the owner of the resource or admins
+        # Write permissions are only allowed to the owner of the resource or admins # noqa
         return obj == request.user or request.user.is_staff

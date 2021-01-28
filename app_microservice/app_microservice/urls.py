@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.urls import include, path
+
 from rest_framework import routers
 
 from core import views
@@ -13,5 +15,14 @@ router.register(r'favorites', views.FavoritesViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('', include('social_django.urls', namespace='social')),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path(
+        'api-auth/',
+        include('rest_framework.urls', namespace='rest_framework')
+    )
 ]
+
+# For local development convenience, serve static content directly from the
+# django wsgi or devserver process.
+if settings.DEBUG:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns(prefix='/static')

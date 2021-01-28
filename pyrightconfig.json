@@ -1,0 +1,13 @@
+{
+    "include": ["app_microservice"],
+    "stubPath": "app_microservice/typestubs",
+    "pythonPlatform": "Linux",
+    "typeCheckingMode": "basic",
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": true,
+    "executionEnvironments": [
+        {
+            "root": "app_microservice"
+        }
+    ]
+}
