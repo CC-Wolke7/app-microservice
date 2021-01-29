@@ -115,7 +115,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTHENTICATION_BACKENDS = ('social_core.backends.google.GoogleOAuth2')
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.google.GoogleOAuth2'
+]
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
@@ -135,5 +138,5 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-BACKEND_API_URL = 'http://localhost:8100'
+BACKEND_API_URL = 'http://localhost:8000'
 STATIC_URL = f'{BACKEND_API_URL}/static/'

@@ -10,7 +10,7 @@ class WSUserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = WSUser
-        fields = ['url', 'username', 'is_staff', 'email', 'offers']
+        fields = ['url', 'username', 'password', 'is_staff', 'email', 'offers']
 
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
