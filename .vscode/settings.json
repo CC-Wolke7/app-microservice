@@ -1,0 +1,19 @@
+{
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "python.venvPath": "${workspaceFolder}/.venv",
+    "python.linting.enabled": true,
+    "python.linting.lintOnSave": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.analysis.extraPaths": ["./app_microservice"],
+    "python.formatting.provider": "yapf",
+    "editor.formatOnSave": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "python.languageServer": "Pylance",
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    }
+}
