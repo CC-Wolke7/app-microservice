@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "attilabuti.vscode-mjml",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "njpwerner.autodocstring",
+        "redhat.vscode-yaml",
+        "editorconfig.editorconfig",
+        "visualstudioexptteam.vscodeintellicode"
+    ]
+}

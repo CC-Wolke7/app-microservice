@@ -5,9 +5,16 @@
 ._*
 
 # --- Editors ---
-.vscode
 *.swp
 *.swo
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
 
 # Icon must end with two \r
 Icon
