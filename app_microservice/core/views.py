@@ -1,9 +1,9 @@
 import time
 
-import google.auth.crypt
-import google.auth.jwt
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -42,42 +42,47 @@ def generate_token(sa_keyfile, sa_email, audience, expiry_length=3600):
 class WSUserViewSet(viewsets.ModelViewSet):
     queryset = WSUser.objects.all().order_by('-date_joined')
     serializer_class = WSUserSerializer
-    permission_classes = [IsAdminOrOwner]
+    permission_classes = [permissions.AllowAny]
 
-    @action(methods='POST', detail=True)
+    @action(detail=True)
     def create_token(self, request, *args, **kwargslf):
 
-        google_token = request.GET.get('access_token')
-        if request.backend.do_auth(google_token):
+        google_token = request.META['HTTP_AUTHORIZATION'][7:]
+
+        try:
+            idinfo = id_token.verify_oauth2_token(google_token, requests.Request(), '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com')
+            userid = idinfo['sub']
 
             google_user = self.queryset.filter(
-                externalId=google_token.sub, signUpMethod='google'
+                externalId=userid, signUpMethod='google'
             )
 
             if (not google_user.exists()):
                 WSUser.objects.create(
-                    username=google_token.name,
+                    username=idinfo['name'],
                     is_staff=False,
-                    email=google_token.email,
-                    offers=[]
+                    email=idinfo['email'],
+                    offers=[],
+                    externalId=userid,
+                    signUpMethod='google'
                 )
-
-            # uuid = generare_uuid()
+            
+            # uuid = generare_uuid() TODO
             token = generate_token(
-                self, '', google_token.email, 'app-microservice'
+                'keyfile_TODO', idinfo['email'], '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com'
             )
 
             return Response(token)
-        return Response(False)
-
+        except ValueError:
+            return Response(False)
 
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
-    permission_classes = [IsAdminOrOwnerOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
 
 class FavoritesViewSet(viewsets.ModelViewSet):
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
-    permission_classes = [IsAdminOrOwnerOrReadOnly]
+    permission_classes = [permissions.AllowAny]
