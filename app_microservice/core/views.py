@@ -2,7 +2,7 @@ import time
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
-from rest_framework_jwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
@@ -41,8 +41,11 @@ class WSUserViewSet(viewsets.ModelViewSet):
             )
 
         # uuid = generare_uuid() TODO
-        payload = api_settings.JWT_PAYLOAD_HANDLER(WSUser.objects.filter(externalId=userid)[0])
-        token = api_settings.JWT_ENCODE_HANDLER(payload)
+        refresh = RefreshToken.for_user(WSUser.objects.filter(externalId=userid)[0])
+        token = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        }
 
         return Response(token)
         #except ValueError:
