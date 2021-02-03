@@ -36,13 +36,12 @@ class WSUserViewSet(viewsets.ModelViewSet):
                 username=idinfo['name'],
                 is_staff=False,
                 email=idinfo['email'],
-                offers=[],
                 externalId=userid,
                 signUpMethod='google'
             )
 
         # uuid = generare_uuid() TODO
-        payload = api_settings.JWT_PAYLOAD_HANDLER(idinfo['sub'])
+        payload = api_settings.JWT_PAYLOAD_HANDLER(WSUser.objects.filter(externalId=userid)[0])
         token = api_settings.JWT_ENCODE_HANDLER(payload)
 
         return Response(token)
