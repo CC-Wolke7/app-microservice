@@ -9,9 +9,13 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import mimetypes
+import os
 from pathlib import Path
 
 from .helper import getenv
+
+mimetypes.add_type("text/plain", ".js", True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # CORS
-CORS_ORIGIN_WHITELIST = ['http://localhost:8000']
+CORS_ORIGIN_WHITELIST = ['http://localhost:8100']
 
 # Application definition
 
@@ -73,9 +77,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app_microservice.wsgi.application'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
+    #'DEFAULT_PERMISSION_CLASSES': [
+    #    'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    #],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ]
@@ -142,4 +146,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 BACKEND_API_URL = 'http://localhost:8000'
+#STATIC_ROOT = os.path.join('C:\\Users\\wdsa1\\Documents\\FH\\Master\\1.\ Semester\\Cloud\ Computing\\Entwicklung\\app-microservice\\app-microservice', 'static')
 STATIC_URL = f'{BACKEND_API_URL}/static/'

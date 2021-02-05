@@ -5,6 +5,7 @@ from django.db import models
 class WSUser(User):
     externalId = models.CharField(max_length=60)
     signUpMethod = models.CharField(max_length=60)
+    description = models.CharField(max_length=200)
 
 
 class Offer(models.Model):
@@ -13,7 +14,7 @@ class Offer(models.Model):
     species = models.CharField(max_length=60)
     breed = models.CharField(max_length=60)
     sterile = models.BooleanField()
-    description = models.CharField(max_length=60)
+    description = models.CharField(max_length=200)
     date_published = models.DateField()
     published_by = models.ForeignKey(
         WSUser, related_name='offers', on_delete=models.CASCADE

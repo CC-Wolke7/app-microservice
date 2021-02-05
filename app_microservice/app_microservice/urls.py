@@ -15,6 +15,7 @@ router.register(r'favorites', views.FavoritesViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
+    path('images/', views.Images.as_view()),
     path('', include('social_django.urls', namespace='social')),
     path(
         'api-auth/',
