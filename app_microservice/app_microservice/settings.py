@@ -14,7 +14,7 @@ from pathlib import Path
 
 from .helper import getenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -24,22 +24,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '4@o&m*3h#$u_w(o)4l8@g#4j+j4%*4*&fyxgni(f2h5xj#zzv*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# When Debug is enabled, Django will give detailed stack traces when there is
+# an error. Should be disabled in production.
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# Only hosts which match this list are allowed to access the site when debug is
+# disabled.
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
 
 # CORS
 CORS_ORIGIN_WHITELIST = ['http://localhost:8000']
 
 # Application definition
-
 INSTALLED_APPS = [
-    'django.contrib.admin', 'django.contrib.auth',
-    'django.contrib.contenttypes', 'django.contrib.sessions',
-    'django.contrib.messages', 'django.contrib.staticfiles', 'corsheaders',
-    'core.apps.CoreConfig', 'rest_framework', 'social_django'
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    # Third party
+    'corsheaders',
+    'core.apps.CoreConfig',
+    'rest_framework',
+    'social_django',
 ]
 
+# The order of some of these middleware matters. For example,
+# SecurityMiddleware should come first, and CorsMiddleware should be placed
+# before any middleware which can generate a response (such as
+# CommonMiddleware).
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -51,6 +69,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# The entrypoint for the url mapping
 ROOT_URLCONF = 'app_microservice.urls'
 
 TEMPLATES = [
@@ -74,17 +93,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app_microservice.wsgi.application'
 
 REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     # ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication'
-    ]
+
+    # Backends which are used to validate requests for signed-in users
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication'
+    # ]
 }
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -103,7 +127,6 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',  # noqa
@@ -128,20 +151,14 @@ SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'CET'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-
 BACKEND_API_URL = 'http://localhost:8000'
-# STATIC_ROOT = os.path.join('C:\\Users\\wdsa1\\Documents\\FH\\Master\\1.\ Semester\\Cloud\ Computing\\Entwicklung\\app-microservice\\app-microservice', 'static') # noqa
 STATIC_URL = f'{BACKEND_API_URL}/static/'
+# STATIC_ROOT = os.path.join('C:\\Users\\wdsa1\\Documents\\FH\\Master\\1.\ Semester\\Cloud\ Computing\\Entwicklung\\app-microservice\\app-microservice', 'static') # noqa
