@@ -11,7 +11,6 @@ services:
         pipenv_dev: --dev
     volumes:
       - ./app_microservice:/app/app_microservice
-      - ./core:/app/core
     ports:
       - 8100:8100
     depends_on:
