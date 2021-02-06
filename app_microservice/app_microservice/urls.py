@@ -2,6 +2,7 @@ from django.conf import settings
 from django.urls import include, path
 
 from rest_framework import routers
+from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from core import views
 
@@ -25,6 +26,10 @@ urlpatterns = [
         views.GoogleIdTokenLoginView.as_view(),
         name='token_obtain_pair'
     ),
+    path(
+        'api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'
+    ),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
 
 # For local development convenience, serve static content directly from the
