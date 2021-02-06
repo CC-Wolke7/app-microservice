@@ -14,6 +14,7 @@ social-auth-app-django = "*"
 google-auth = "*"
 mysqlclient = "*"
 djangorestframework-simplejwt = "*"
+google-cloud-storage = "*"
 
 [dev-packages]
 flake8 = "~=3.7.0"
