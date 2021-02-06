@@ -51,6 +51,11 @@ docker-compose restart django
 header "[ Running Database Migrations ]"
 docker-compose exec django ./manage.py migrate
 
+header "[ Creating Superuser ]"
+if promptyn "Create a superuser (recommended)? [y/n] >"; then
+    docker-compose exec django ./manage.py createsuperuser
+fi
+
 header "[ Status ]"
 echo "The following containers are now running:"
 echo
