@@ -132,18 +132,18 @@ class GoogleIdTokenLoginView(APIView):
 
 
 class WSUserViewSet(viewsets.ModelViewSet):
+    # @TODO: restrict querset to currently authenticated user
     queryset = WSUser.objects.all().order_by('-date_joined')
     serializer_class = WSUserSerializer
-    permission_classes = [permissions.AllowAny]
 
 
 class OfferViewSet(viewsets.ModelViewSet):
+    # @TODO: only allow creator to modify offer
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
-    permission_classes = [permissions.AllowAny]
 
 
 class FavoritesViewSet(viewsets.ModelViewSet):
+    # @TODO: restrict querset to currently authenticated user
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
-    permission_classes = [permissions.AllowAny]
