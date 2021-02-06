@@ -13,6 +13,7 @@ django-cors-headers = "*"
 social-auth-app-django = "*"
 google-auth = "*"
 mysqlclient = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 flake8 = "~=3.7.0"
