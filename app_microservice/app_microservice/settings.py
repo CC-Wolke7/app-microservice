@@ -51,8 +51,7 @@ INSTALLED_APPS = [
     # Third party
     'corsheaders',
     'core.apps.CoreConfig',
-    'rest_framework',
-    'social_django',
+    'rest_framework'
 ]
 
 # The order of some of these middleware matters. For example,
@@ -84,8 +83,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.template.context_processors.static',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends'
+                'django.contrib.messages.context_processors.messages'
             ],
         },
     },
@@ -169,12 +167,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'social_core.backends.google.GoogleOAuth2'
-]
-
-SOCIAL_AUTH_URL_NAMESPACE = 'social'
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

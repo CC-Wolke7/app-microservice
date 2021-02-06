@@ -16,7 +16,6 @@ router.register(r'favorites', views.FavoritesViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('images/', views.Images.as_view()),
-    path('', include('social_django.urls', namespace='social')),
     path(
         'api-auth/',
         include('rest_framework.urls', namespace='rest_framework')
