@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.urls import include, path
 
 from rest_framework import routers
@@ -20,7 +19,12 @@ urlpatterns = [
     path(
         'api-auth/',
         include('rest_framework.urls', namespace='rest_framework')
-    )
+    ),
+    path(
+        'api/token/google',
+        views.GoogleIdTokenLoginView.as_view(),
+        name='token_obtain_pair'
+    ),
 ]
 
 # For local development convenience, serve static content directly from the
