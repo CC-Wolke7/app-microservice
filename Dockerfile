@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.9-alpine
 
 RUN apk update && apk add --no-cache mariadb-dev libressl-dev libffi-dev g++ linux-headers musl-dev make
 RUN pip install pipenv==2020.11.15
