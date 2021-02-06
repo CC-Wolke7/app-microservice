@@ -65,7 +65,7 @@ echo
 header "Setup complete!"
 echo
 echo "Access the app-api with a web browser:"
-echo "  $ open http://localhost:8100/"
+echo "  $ open http://localhost:8000/"
 echo
 echo "Perform future management tasks with docker-compose:"
 echo "  $ docker-compose help"

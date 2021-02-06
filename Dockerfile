@@ -17,10 +17,10 @@ RUN apk del g++ mariadb-dev libressl-dev libffi-dev musl-dev linux-headers make 
 
 ENV DJANGO_ENVIRONMENT="production"
 COPY . ./
-EXPOSE 8100
+EXPOSE 8000
 
 WORKDIR /app/app_microservice
 ENTRYPOINT ["gunicorn", "app_microservice.wsgi:application", \
     "--name=app-api", \
-    "--bind=0.0.0.0:8100", \
+    "--bind=0.0.0.0:8000", \
     "--workers=4"]
