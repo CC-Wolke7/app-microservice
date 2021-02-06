@@ -1,8 +1,8 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.urls import include, path
 
 from rest_framework import routers
+from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from core import views
 
@@ -16,11 +16,19 @@ router.register(r'favorites', views.FavoritesViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('images/', views.Images.as_view()),
-    path('', include('social_django.urls', namespace='social')),
     path(
         'api-auth/',
         include('rest_framework.urls', namespace='rest_framework')
-    )
+    ),
+    path(
+        'api/token/google',
+        views.GoogleIdTokenLoginView.as_view(),
+        name='token_obtain_pair'
+    ),
+    path(
+        'api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'
+    ),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
 
 # For local development convenience, serve static content directly from the

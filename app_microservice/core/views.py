@@ -2,10 +2,12 @@ from google.auth.transport import requests
 from google.cloud import storage
 from google.oauth2 import id_token
 
-from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
+from django.utils.encoding import smart_text
+
+from rest_framework import exceptions, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.settings import api_settings as jwt_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Favorites, Offer, WSUser
@@ -37,55 +39,111 @@ class Images(APIView):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class WSUserViewSet(viewsets.ModelViewSet):
-    queryset = WSUser.objects.all().order_by('-date_joined')
-    serializer_class = WSUserSerializer
+class GoogleIdTokenLoginView(APIView):
+    """
+    Receives a Google ID token passed as a `Bearer` token in
+    the `Authorization` header.
+
+    Returns a JSON Web Token that can be used for authenticated requests.
+    """
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
-    @action(detail=True)
-    def create_token(self, request, *args, **kwargslf):
+    def get_jwt_value(self, request):
+        auth = request.META.get(jwt_settings.AUTH_HEADER_NAME)
 
-        google_token = request.META['HTTP_AUTHORIZATION'][7:]
+        if not auth:
+            return None
 
-        # try:
-        idinfo = id_token.verify_oauth2_token(
-            google_token,
-            requests.Request(),
-            '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com'  # noqa
-        )
-        userid = idinfo['sub']
+        auth = auth.split()
+        auth_header_prefix = jwt_settings.AUTH_HEADER_TYPES.lower()
 
-        google_user = self.queryset.filter(
-            externalId=userid, signUpMethod='google'
-        )
+        if len(auth) == 0:
+            return None
 
-        if (not google_user.exists()):
-            WSUser.objects.create(
-                username=idinfo['name'],
+        if smart_text(auth[0].lower()) != auth_header_prefix.lower():
+            return None
+
+        if len(auth) == 1:
+            raise exceptions.AuthenticationFailed(
+                code='invalid_auth_header',
+                detail='Invalid Authorization header. No credentials provided'
+            )
+        elif len(auth) > 2:
+            raise exceptions.AuthenticationFailed(
+                code='invalid_auth_header',
+                detail='Invalid Authorization header. Credentials string '
+                'should not contain spaces.'
+            )
+
+        return smart_text(auth[1])
+
+    def get(self, request, *args, **kwargs):
+        google_id_token = self.get_jwt_value(request)
+
+        if google_id_token is None:
+            raise exceptions.NotAuthenticated()
+
+        try:
+            google_id = id_token.verify_oauth2_token(
+                google_id_token,
+                requests.Request(),
+                '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com'  # noqa
+            )
+
+            # google_id = {
+            #     "sub": "123",
+            #     "name": "nik sauer",
+            #     "email": "nik.sauer@me.com"
+            # }
+        except:  # noqa
+            raise exceptions.NotAuthenticated()
+
+        user_id = google_id["sub"]
+
+        try:
+            user = WSUser.objects.all().get(
+                externalId=user_id, signUpMethod='google'
+            )
+        except WSUser.DoesNotExist:
+            name = google_id.get("name")
+            email = google_id.get("email")
+
+            if not name or not email:
+                raise exceptions.AuthenticationFailed(
+                    code='invalid_google_id_claims',
+                    detail='Name and email are required Google ID claims.'
+                )
+
+            user = WSUser.objects.create(
+                username=google_id['name'],
                 is_staff=False,
-                email=idinfo['email'],
-                externalId=userid,
+                email=google_id['email'],
+                externalId=user_id,
                 signUpMethod='google'
             )
 
-        # uuid = generare_uuid() TODO
-        refresh = RefreshToken.for_user(
-            WSUser.objects.filter(externalId=userid)[0]
-        )
-        token = {'refresh': str(refresh), 'access': str(refresh.access_token)}
+        token_refresh = RefreshToken.for_user(user)
 
-        return Response(token)
-        # except ValueError:
-        #    return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            'refresh': str(token_refresh),
+            'access': str(token_refresh.access_token)
+        })
+
+
+class WSUserViewSet(viewsets.ModelViewSet):
+    # @TODO: restrict querset to currently authenticated user
+    queryset = WSUser.objects.all().order_by('-date_joined')
+    serializer_class = WSUserSerializer
 
 
 class OfferViewSet(viewsets.ModelViewSet):
+    # @TODO: only allow creator to modify offer
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
-    permission_classes = [permissions.AllowAny]
 
 
 class FavoritesViewSet(viewsets.ModelViewSet):
+    # @TODO: restrict querset to currently authenticated user
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
-    permission_classes = [permissions.AllowAny]
