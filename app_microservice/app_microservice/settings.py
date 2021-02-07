@@ -36,8 +36,10 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+FRONTEND_APP_URL = 'http://localhost:8001'
+
 # CORS
-CORS_ORIGIN_WHITELIST = ['http://localhost:8000']
+CORS_ORIGIN_WHITELIST = [FRONTEND_APP_URL]
 
 # Application definition
 INSTALLED_APPS = [
