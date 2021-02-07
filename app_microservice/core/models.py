@@ -1,8 +1,11 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
 
 
 class WSUser(User):
+    uuid = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
     externalId = models.CharField(max_length=60)
     signUpMethod = models.CharField(max_length=60)
     description = models.CharField(max_length=200)

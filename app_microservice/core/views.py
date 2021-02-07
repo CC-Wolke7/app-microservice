@@ -8,11 +8,12 @@ from rest_framework import exceptions, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Favorites, Offer, WSUser
 from .permissions import IsAdminOrOwner, IsAdminOrOwnerOrReadOnly  # noqa
-from .serializers import FavoritesSerializer, OfferSerializer, WSUserSerializer
+from .serializers import (
+    AuthTokenSerializer, FavoritesSerializer, OfferSerializer, WSUserSerializer
+)
 
 
 class Images(APIView):
@@ -123,7 +124,7 @@ class GoogleIdTokenLoginView(APIView):
                 signUpMethod='google'
             )
 
-        token_refresh = RefreshToken.for_user(user)
+        token_refresh = AuthTokenSerializer.get_token(user)
 
         return Response({
             'refresh': str(token_refresh),

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Favorites, Offer, WSUser
 
@@ -10,7 +11,10 @@ class WSUserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = WSUser
-        fields = ['url', 'username', 'password', 'is_staff', 'email', 'offers']
+        fields = [
+            'url', "uuid", 'username', 'password', 'is_staff', 'email',
+            'offers'
+        ]
 
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
@@ -33,3 +37,15 @@ class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Favorites
         fields = ['url', 'user', 'offers']
+
+
+class AuthTokenSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['sub'] = str(user.uuid)
+        token['name'] = user.username
+        token['email'] = user.email
+
+        return token
