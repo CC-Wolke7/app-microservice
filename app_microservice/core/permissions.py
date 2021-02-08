@@ -1,6 +1,16 @@
 from rest_framework import permissions
 
 
+class WSUserPermission(permissions.BasePermission):
+    """
+    Custom permission to only allow admins or the user itself to view a user-entry
+    """
+    def has_object_permission(self, request, view, obj):
+
+        # Write permissions are only allowed to the owner of the resource or admins # noqa
+        return str(obj) == str(request.user) or request.user.is_staff
+
+
 class OfferPermission(permissions.BasePermission):
     """
     Custom permission to only allow creators of an offer or admins to edit it
@@ -12,17 +22,8 @@ class OfferPermission(permissions.BasePermission):
             return True
 
         # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return obj.published_by == request.user or request.user.is_staff
+        return str(obj.published_by) == str(request.user) or request.user.is_staff
 
-
-class WSUserPermission(permissions.BasePermission):
-    """
-    Custom permission to only allow admins or the user itself to view a user-entry
-    """
-    def has_object_permission(self, request, view, obj):
-
-        # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return obj == request.user or request.user.is_staff
 
 class FavoritesPermission(permissions.BasePermission):
     """
@@ -31,4 +32,4 @@ class FavoritesPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
 
         # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return obj == request.user or request.user.is_staff
+        return str(obj.user) == str(request.user) or request.user.is_staff

@@ -12,6 +12,7 @@ class WSUser(User):
 
 
 class Offer(models.Model):
+    uuid = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
     name = models.CharField(max_length=60)
     age = models.IntegerField()
     species = models.CharField(max_length=60)
@@ -31,8 +32,5 @@ class Offer(models.Model):
 
 
 class Favorites(models.Model):
-    user = models.ForeignKey(WSUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(WSUser, related_name='favorites', on_delete=models.CASCADE)
     offers = models.ForeignKey(Offer, on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ['user']
