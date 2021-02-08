@@ -1,9 +1,9 @@
 from rest_framework import permissions
 
 
-class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
+class OfferPermission(permissions.BasePermission):
     """
-    Custom permission to only allow owners of a resource or admins to edit it
+    Custom permission to only allow creators of an offer or admins to edit it
     """
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
@@ -15,9 +15,18 @@ class IsAdminOrOwnerOrReadOnly(permissions.BasePermission):
         return obj.published_by == request.user or request.user.is_staff
 
 
-class IsAdminOrOwner(permissions.BasePermission):
+class WSUserPermission(permissions.BasePermission):
     """
-    Custom permission to only allow owners of a resource or admins to view it
+    Custom permission to only allow admins or the user itself to view a user-entry
+    """
+    def has_object_permission(self, request, view, obj):
+
+        # Write permissions are only allowed to the owner of the resource or admins # noqa
+        return obj == request.user or request.user.is_staff
+
+class FavoritesPermission(permissions.BasePermission):
+    """
+    Custom permission to only allow admins or the user itself to view a favorite-entry
     """
     def has_object_permission(self, request, view, obj):
 

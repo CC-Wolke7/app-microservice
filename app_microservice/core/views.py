@@ -10,7 +10,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .models import Favorites, Offer, WSUser
-from .permissions import IsAdminOrOwner, IsAdminOrOwnerOrReadOnly  # noqa
+from .permissions import (  # noqa
+    FavoritesPermission, OfferPermission, WSUserPermission
+)
 from .serializers import (
     AuthTokenSerializer, FavoritesSerializer, OfferSerializer, WSUserSerializer
 )
@@ -117,9 +119,9 @@ class GoogleIdTokenLoginView(APIView):
                 )
 
             user = WSUser.objects.create(
-                username=google_id['name'],
+                username=name,
                 is_staff=False,
-                email=google_id['email'],
+                email=email,
                 externalId=user_id,
                 signUpMethod='google'
             )
@@ -133,18 +135,18 @@ class GoogleIdTokenLoginView(APIView):
 
 
 class WSUserViewSet(viewsets.ModelViewSet):
-    # @TODO: restrict querset to currently authenticated user
     queryset = WSUser.objects.all().order_by('-date_joined')
     serializer_class = WSUserSerializer
+    permission_classes = [WSUserPermission] # @TODO: restrict querset to currently authenticated user
 
 
 class OfferViewSet(viewsets.ModelViewSet):
-    # @TODO: only allow creator to modify offer
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
+    permission_classes = [OfferPermission] # @TODO: only allow creator to modify offer
 
 
 class FavoritesViewSet(viewsets.ModelViewSet):
-    # @TODO: restrict querset to currently authenticated user
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
+    permission_classes = [FavoritesPermission] # @TODO: restrict querset to currently authenticated user
