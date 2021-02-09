@@ -23,6 +23,8 @@ services:
       DJANGO_DATABASE_PASSWORD: devpass
       DJANGO_DATABASE_HOST: db
       DJANGO_DATABASE_PORT: 3306
+      STORAGE_EMULATOR_HOST: 172.21.96.1:9090 # Dependet on your setup
+      GOOGLE_APPLICATION_CREDENTIALS: /app/testcred.json
     command: --reload --log-level=info
 
   # ----

@@ -10,6 +10,7 @@ class WSUser(PermissionsMixin, AbstractBaseUser):
     name = models.CharField(blank=True, db_index=True, max_length=255)
     uuid = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
     email = models.EmailField(unique=True, db_index=True)
+    is_staff = models.BooleanField(default=False)
     externalId = models.CharField(max_length=60)
     signUpMethod = models.CharField(max_length=60)
     description = models.CharField(max_length=200)
@@ -17,7 +18,7 @@ class WSUser(PermissionsMixin, AbstractBaseUser):
     objects = WSUserManager()
 
     # These attributes are required for the Django auth builtins
-    USERNAME_FIELD = 'uuid'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
 
 
