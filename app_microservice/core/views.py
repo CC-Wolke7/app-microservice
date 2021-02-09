@@ -94,11 +94,11 @@ class GoogleIdTokenLoginView(APIView):
                 '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com'  # noqa
             )
 
-            #google_id = {
+            # google_id = {
             #    "sub": "123",
             #    "name": "nik sauer",
             #    "email": "nik.sauer@me.com"
-            #}
+            # }
         except:  # noqa
             raise exceptions.NotAuthenticated()
 
@@ -119,8 +119,7 @@ class GoogleIdTokenLoginView(APIView):
                 )
 
             user = WSUser.objects.create(
-                username=name,
-                is_staff=False,
+                name=name,
                 email=email,
                 externalId=user_id,
                 signUpMethod='google'
@@ -134,15 +133,15 @@ class GoogleIdTokenLoginView(APIView):
         })
 
 
-class WSUserViewSet(mixins.CreateModelMixin,
-                    mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    viewsets.GenericViewSet):
+class WSUserViewSet(
+    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     queryset = WSUser.objects.all().order_by('-date_joined')
     serializer_class = WSUserSerializer
     permission_classes = [WSUserPermission]
     lookup_field = 'uuid'
+
 
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
@@ -150,11 +149,10 @@ class OfferViewSet(viewsets.ModelViewSet):
     permission_classes = [OfferPermission]
 
 
-class FavoritesViewSet(mixins.CreateModelMixin,
-                        mixins.RetrieveModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
+class FavoritesViewSet(
+    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
     permission_classes = [FavoritesPermission]

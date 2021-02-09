@@ -53,7 +53,10 @@ docker-compose exec django ./manage.py migrate
 
 header "[ Creating Superuser ]"
 if promptyn "Create a superuser (recommended)? [y/n] >"; then
-    docker-compose exec django ./manage.py createsuperuser
+    read -rp "Email: " user_email
+    UUID=$(uuidgen)
+
+    docker-compose exec django ./manage.py createsuperuser --uuid $UUID
 fi
 
 header "[ Status ]"
