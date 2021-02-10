@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
-from .helper import getenv
+from .helper import getenv, netloc
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,20 +20,20 @@ SECRET_KEY = getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 # When Debug is enabled, Django will give detailed stack traces when there is
 # an error. Should be disabled in production.
-DEBUG = getenv("DJANGO_DEBUG", False)
+DEBUG = getenv("DJANGO_DEBUG", True)
 
 # Frontend (Ionic) and Backend (Django) URLs
 BACKEND_API_URL = getenv("DJANGO_API_URL", "http://localhost:8000")
 FRONTEND_APP_URL = getenv("DJANGO_FRONTEND_URL", "http://localhost:8100")
-STATIC_URL = "http://localhost:8000/static/"
+STATIC_URL = f"{BACKEND_API_URL}/static/"
 
 # Only hosts which match this list are allowed to access the site when debug is
 # disabled.
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    # netloc(BACKEND_API_URL),
-    # netloc(FRONTEND_APP_URL)
+    netloc(BACKEND_API_URL),
+    netloc(FRONTEND_APP_URL),
 ]
 
 # CORS
@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     # Third party
     "corsheaders",
     "core.apps.CoreConfig",
-    "rest_framework"
+    "rest_framework",
+    "drf_yasg",
 ]
 
 # The order of some of these middleware matters. For example,
@@ -171,6 +172,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 AUTH_USER_MODEL = "core.WSUser"
+
+# This is used to redirect logins for the API documentation views, which can be
+# accessed with session-based authentication, but require the user be an admin
+# (is_staff=True).
+LOGIN_URL = "/internal/admin/login"
+
+# Swagger settings are used by the auto-generated API documentation.
+# https://drf-yasg.readthedocs.io/en/stable/security.html#security-definitions
+SWAGGER_SETTINGS = {}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
