@@ -41,3 +41,6 @@ __pycache__/
 **/settings/local_overrides.py
 *.sqlite3
 media
+
+testcred.json
+createbucket.py

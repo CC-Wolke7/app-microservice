@@ -4,13 +4,15 @@ from google.oauth2 import id_token
 
 from django.utils.encoding import smart_text
 
-from rest_framework import exceptions, permissions, status, viewsets
+from rest_framework import exceptions, mixins, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .models import Favorites, Offer, WSUser
-from .permissions import IsAdminOrOwner, IsAdminOrOwnerOrReadOnly  # noqa
+from .permissions import (  # noqa
+    FavoritesPermission, OfferPermission, WSUserPermission
+)
 from .serializers import (
     AuthTokenSerializer, FavoritesSerializer, OfferSerializer, WSUserSerializer
 )
@@ -93,9 +95,9 @@ class GoogleIdTokenLoginView(APIView):
             )
 
             # google_id = {
-            #     "sub": "123",
-            #     "name": "nik sauer",
-            #     "email": "nik.sauer@me.com"
+            #    "sub": "123",
+            #    "name": "nik sauer",
+            #    "email": "nik.sauer@me.com"
             # }
         except:  # noqa
             raise exceptions.NotAuthenticated()
@@ -117,9 +119,8 @@ class GoogleIdTokenLoginView(APIView):
                 )
 
             user = WSUser.objects.create(
-                username=google_id['name'],
-                is_staff=False,
-                email=google_id['email'],
+                name=name,
+                email=email,
                 externalId=user_id,
                 signUpMethod='google'
             )
@@ -132,19 +133,26 @@ class GoogleIdTokenLoginView(APIView):
         })
 
 
-class WSUserViewSet(viewsets.ModelViewSet):
-    # @TODO: restrict querset to currently authenticated user
+class WSUserViewSet(
+    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     queryset = WSUser.objects.all().order_by('-date_joined')
     serializer_class = WSUserSerializer
+    permission_classes = [WSUserPermission]
+    lookup_field = 'uuid'
 
 
 class OfferViewSet(viewsets.ModelViewSet):
-    # @TODO: only allow creator to modify offer
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
+    permission_classes = [OfferPermission]
 
 
-class FavoritesViewSet(viewsets.ModelViewSet):
-    # @TODO: restrict querset to currently authenticated user
+class FavoritesViewSet(
+    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
+    permission_classes = [FavoritesPermission]

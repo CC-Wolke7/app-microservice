@@ -36,8 +36,10 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+FRONTEND_APP_URL = 'http://localhost:8001'
+
 # CORS
-CORS_ORIGIN_WHITELIST = ['http://localhost:8000']
+CORS_ORIGIN_WHITELIST = [FRONTEND_APP_URL]
 
 # Application definition
 INSTALLED_APPS = [
@@ -122,8 +124,8 @@ SIMPLE_JWT = {
     'ISSUER': None,
     'AUTH_HEADER_TYPES': 'Bearer',
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
+    'USER_ID_FIELD': 'uuid',
+    'USER_ID_CLAIM': 'sub',
     'AUTH_TOKEN_CLASSES': ['rest_framework_simplejwt.tokens.AccessToken'],
     'TOKEN_TYPE_CLAIM': 'token_type',
     'JTI_CLAIM': 'jti',
@@ -168,6 +170,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
+AUTH_USER_MODEL = 'core.WSUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
