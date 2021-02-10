@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     # Third party
     "corsheaders",
     "core.apps.CoreConfig",
-    "rest_framework"
+    "rest_framework",
+    "drf_yasg",
 ]
 
 # The order of some of these middleware matters. For example,
@@ -171,6 +172,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 AUTH_USER_MODEL = "core.WSUser"
+
+# This is used to redirect logins for the API documentation views, which can be
+# accessed with session-based authentication, but require the user be an admin
+# (is_staff=True).
+LOGIN_URL = "/internal/admin/login"
+
+# Swagger settings are used by the auto-generated API documentation.
+# https://drf-yasg.readthedocs.io/en/stable/security.html#security-definitions
+SWAGGER_SETTINGS = {}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
