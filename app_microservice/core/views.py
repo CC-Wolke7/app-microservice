@@ -91,7 +91,7 @@ class GoogleIdTokenLoginView(APIView):
             google_id = id_token.verify_oauth2_token(
                 google_id_token,
                 requests.Request(),
-                '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com'  # noqa
+                '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
             )
 
             # google_id = {
