@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -22,3 +23,19 @@ def getenv(var_name, default=_notset, split=False):
         return val.split(',')
 
     return val
+
+
+def netloc(url):
+    """ Strip the scheme (http, https) from a URL """
+    split = urlsplit(url)
+
+    # If we have a scheme, urlparse will get this right
+    if split.scheme:
+        return split.netloc
+
+    # Otherwise, manually make sure to get rid of any trailing path components
+    url = url.split('/')[0]
+    url = url.split('?')[0]
+    url = url.split('#')[0]
+
+    return url
