@@ -34,7 +34,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    getenv("DJANGO_APP_URL", ""),
+    "app-api-xm7n7eaepa-ey.a.run.app",
 ]
 
 FRONTEND_APP_URL = 'http://localhost:8100'
@@ -42,7 +42,7 @@ FRONTEND_APP_URL = 'http://localhost:8100'
 # CORS
 CORS_ORIGIN_WHITELIST = [
     FRONTEND_APP_URL,
-    getenv("DJANGO_APP_URL", ""),
+    "https://app-api-xm7n7eaepa-ey.a.run.app"
 ]
 
 # Application definition
@@ -186,6 +186,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-BACKEND_API_URL = 'http://localhost:8000'
+BACKEND_API_URL = "https://app-api-xm7n7eaepa-ey.a.run.app"
 STATIC_URL = f'{BACKEND_API_URL}/static/'
 # STATIC_ROOT = os.path.join('C:\\Users\\wdsa1\\Documents\\FH\\Master\\1.\ Semester\\Cloud\ Computing\\Entwicklung\\app-microservice\\app-microservice', 'static') # noqa

@@ -11,7 +11,7 @@ spec:
         run.googleapis.com/cloudsql-instances: wolke-sieben-fs:europe-west3:app-storage
     spec:
       containers:
-        - image: gcr.io/wolke-sieben-fs/app-microservice:a34ba3d-dirty-dev
+        - image: gcr.io/wolke-sieben-fs/app-microservice:19bfe06-dirty-dev
           # command:
           #   - /bin/sh
           # args:
