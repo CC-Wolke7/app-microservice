@@ -27,11 +27,7 @@ def getenv(var_name, default=_notset, split=False):
 
 def netloc(url):
     """ Strip the scheme (http, https) from a URL """
-<<<<<<< HEAD
-    split = urllib.parse.urlsplit(url)
-=======
     split = urlsplit(url)
->>>>>>> 52a5d26aa186a2832a6a779bd24f5f13313e588f
 
     # If we have a scheme, urlparse will get this right
     if split.scheme:
