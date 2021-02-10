@@ -89,17 +89,17 @@ class GoogleIdTokenLoginView(APIView):
             raise exceptions.NotAuthenticated()
 
         try:
-            #google_id = id_token.verify_oauth2_token(
-            #    google_id_token,
-            #    requests.Request(),
-            #    '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
-            #)
+            google_id = id_token.verify_oauth2_token(
+                google_id_token,
+                requests.Request(),
+                '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
+            )
 
-            google_id = {
-                "sub": "123",
-                "name": "nik sauer",
-                "email": "nik.sauer@me.com"
-            }
+            # google_id = {
+            #    "sub": "123",
+            #    "name": "nik sauer",
+            #    "email": "nik.sauer@me.com"
+            # }
         except:  # noqa
             raise exceptions.NotAuthenticated()
 

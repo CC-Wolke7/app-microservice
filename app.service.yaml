@@ -1,0 +1,42 @@
+# Cloud Run Configuration
+# https://cloud.google.com/sdk/gcloud/reference/run/deploy#OPTIONAL-FLAGS
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: app-api
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cloudsql-instances: wolke-sieben-fs:europe-west3:app-storage
+    spec:
+      containers:
+        - image: gcr.io/wolke-sieben-fs/app-microservice:50a82ad-dirty-dev # gcr.io/$GCP_PROJECT_ID/$IMAGE_NAME:$IMAGE_VERSION
+          # command:
+          #   - /bin/sh
+          # args:
+          #   - -c
+          #   - "python manage.py migrate"
+          #   - "python manage.py createsuperuser --noinput --email root@root.com --name root"
+          ports:
+            - containerPort: 8000
+          env:
+            # - name: DJANGO_SUPERUSER_PASSWORD
+            #   value: "root"
+            - name: DJANGO_SECRET_KEY
+              value: "OGFhMjM1M2U0MzM5ZTNkMTI5NTgwMTViOTE3ODkyNjc5NWViZjUwMTUzYWNhMTU0Cg=="
+            - name: DJANGO_DATABASE_NAME
+              value: "app_microservice"
+            - name: DJANGO_DATABASE_USER
+              value: "root"
+            - name: DJANGO_DATABASE_PASSWORD
+              value: "8B31zgJafE3n4NzI"
+            - name: DJANGO_DATABASE_HOST
+              value: "/cloudsql/wolke-sieben-fs:europe-west3:app-storage"
+            - name: DJANGO_API_URL
+              value: "https://app-api-xm7n7eaepa-ey.a.run.app"
+            # - name: DJANGO_FRONTEND_URL
+            # value: "" # @TODO
+  traffic:
+    - percent: 100
+      latestRevision: true
