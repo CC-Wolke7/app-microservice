@@ -62,3 +62,32 @@ $ pipenv run pre-commit install
 ```
 
 For VSCode, an appropriate `settings.json` is shipped as part of this repository.
+
+## Deployment
+
+This project includes a GitHub workflow for deployment to Google Cloud Run. To do so, perform the following steps:
+
+1. Create a new service account (SA) via: IAM & Admin > Service Accounts > Create Service Account
+
+2. Grant permissions via IAM & Admin > IAM > Permissions > Edit SA (from above) > Add another role
+
+- Service Account User
+- Cloud Run Admin
+
+3. Generate a service account key via IAM & Admin > Service Accounts > Actions > Create key > type: JSON
+
+4. Add GitHub secrets
+
+- `GCP_PROJECT_ID: <your-project>`
+- `GCP_SA_KEY: <JSON-contents-from-above>`
+
+5. Enable the Google Admin APIs
+
+- [Cloud Run](https://console.developers.google.com/apis/api/run.googleapis.com)
+- [Cloud SQL](https://console.developers.google.com/apis/api/sqladmin.googleapis.com)
+
+6. Provision a new CloudSQL (MySQL v8) instance with a public IP and a database named `app_microservice`
+
+7. Deploy via GitHub Actions (**Note:** initial deployment should be performed locally and use commented commands in `app.service.yaml`)
+
+8. Allow public access via Cloud Run > `app-api` service > Permissions > Add > members: `allUsers` / role: `Cloud Run Invoker`
