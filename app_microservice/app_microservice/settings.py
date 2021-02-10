@@ -34,12 +34,16 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    getenv("DJANGO_APP_URL", ""),
 ]
 
 FRONTEND_APP_URL = 'http://localhost:8100'
 
 # CORS
-CORS_ORIGIN_WHITELIST = [FRONTEND_APP_URL]
+CORS_ORIGIN_WHITELIST = [
+    FRONTEND_APP_URL,
+    getenv("DJANGO_APP_URL", ""),
+]
 
 # Application definition
 INSTALLED_APPS = [
