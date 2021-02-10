@@ -14,6 +14,7 @@ class WSUser(PermissionsMixin, AbstractBaseUser):
     externalId = models.CharField(max_length=60)
     signUpMethod = models.CharField(max_length=60)
     description = models.CharField(max_length=200)
+    profileImageName = models.CharField(max_length=60)
 
     objects = WSUserManager()
 
@@ -28,9 +29,11 @@ class Offer(models.Model):
     age = models.IntegerField()
     species = models.CharField(max_length=60)
     breed = models.CharField(max_length=60)
+    sex = models.CharField(max_length=1)
     sterile = models.BooleanField()
     description = models.CharField(max_length=200)
     date_published = models.DateField()
+    place = models.CharField(max_length=200)
     published_by = models.ForeignKey(
         WSUser, related_name='offers', on_delete=models.CASCADE
     )
@@ -46,4 +49,19 @@ class Favorites(models.Model):
     user = models.ForeignKey(
         WSUser, related_name='favorites', on_delete=models.CASCADE
     )
+
     offers = models.ForeignKey(Offer, on_delete=models.CASCADE)
+
+class Media(models.Model):
+    offer = models.ForeignKey(
+        Offer, related_name='media', on_delete=models.CASCADE
+    )
+
+    image = models.CharField(max_length=60)
+
+class Subscriptions(models.Model):
+    user = models.ForeignKey(
+        WSUser, related_name='subscriptions', on_delete=models.CASCADE
+    )
+
+    breed = models.CharField(max_length=60)

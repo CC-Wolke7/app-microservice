@@ -5,16 +5,17 @@ from google.oauth2 import id_token
 from django.utils.encoding import smart_text
 
 from rest_framework import exceptions, mixins, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
-from .models import Favorites, Offer, WSUser
+from .models import WSUser, Offer, Favorites, Subscriptions
 from .permissions import (  # noqa
-    FavoritesPermission, OfferPermission, WSUserPermission
+    WSUserPermission, OfferPermission, FavoritesPermission
 )
 from .serializers import (
-    AuthTokenSerializer, FavoritesSerializer, OfferSerializer, WSUserSerializer
+    WSUserSerializer, OfferSerializer, FavoritesSerializer, SubscriptionsSerializer, AuthTokenSerializer
 )
 
 
@@ -88,17 +89,17 @@ class GoogleIdTokenLoginView(APIView):
             raise exceptions.NotAuthenticated()
 
         try:
-            google_id = id_token.verify_oauth2_token(
-                google_id_token,
-                requests.Request(),
-                '882517722597-3p6j1koj84oa27kv4bc9t58egianqf3e.apps.googleusercontent.com'  # noqa
-            )
+            #google_id = id_token.verify_oauth2_token(
+            #    google_id_token,
+            #    requests.Request(),
+            #    '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
+            #)
 
-            # google_id = {
-            #    "sub": "123",
-            #    "name": "nik sauer",
-            #    "email": "nik.sauer@me.com"
-            # }
+            google_id = {
+                "sub": "123",
+                "name": "nik sauer",
+                "email": "nik.sauer@me.com"
+            }
         except:  # noqa
             raise exceptions.NotAuthenticated()
 
@@ -133,14 +134,43 @@ class GoogleIdTokenLoginView(APIView):
         })
 
 
-class WSUserViewSet(
+class WSUserViewSet(mixins.ListModelMixin,
     mixins.CreateModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = WSUser.objects.all().order_by('-date_joined')
+    queryset = WSUser.objects.all()
     serializer_class = WSUserSerializer
     permission_classes = [WSUserPermission]
     lookup_field = 'uuid'
+
+    @action(detail=True)
+    def get_subscriptions(self, request, *args, **kwargs):
+        try:
+            subscriber = self.get_object()
+            subscriptions = Subscriptions.objects.filter(user=subscriber)
+
+            result = []
+            for subscription in subscriptions:
+                result.append(subscription.breed)
+
+            return Response(result, status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class Breeds(APIView):
+    def get(self, request, format=None):
+        try:
+            subscribtion = request.query_params['breed']
+            subscribers = Subscriptions.objects.filter(breed=subscribtion)
+
+            result = []
+            for subscriber in subscribers:
+                result.append(subscriber.user.uuid)
+
+            return Response(result, status=status.HTTP_200_OK)
+        except:  # noqa
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class OfferViewSet(viewsets.ModelViewSet):
@@ -155,4 +185,12 @@ class FavoritesViewSet(
 ):
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
+    permission_classes = [FavoritesPermission]
+
+class SubscriptionsViewSet(
+    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = Subscriptions.objects.all()
+    serializer_class = SubscriptionsSerializer
     permission_classes = [FavoritesPermission]
