@@ -36,7 +36,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-FRONTEND_APP_URL = 'http://localhost:8001'
+FRONTEND_APP_URL = 'http://localhost:8100'
 
 # CORS
 CORS_ORIGIN_WHITELIST = [FRONTEND_APP_URL]
