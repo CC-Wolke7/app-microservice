@@ -17,7 +17,7 @@ RUN apk del g++ mariadb-dev libressl-dev libffi-dev musl-dev linux-headers make 
 
 ENV DJANGO_ENVIRONMENT="production"
 COPY . ./
-COPY swagger-ui.html /usr/local/lib/python3.9/site-packages/django/contrib/admin/templates/
+# COPY swagger-ui.html /usr/local/lib/python3.9/site-packages/django/contrib/admin/templates/
 EXPOSE 8000
 
 WORKDIR /app/app_microservice
