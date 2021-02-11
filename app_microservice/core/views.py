@@ -12,7 +12,8 @@ from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .models import WSUser, Offer, Favorites, Subscriptions
 from .permissions import (  # noqa
-    WSUserPermission, OfferPermission, FavoritesPermission
+    WSUserPermission, OfferPermission, FavoritesPermission,
+    ServiceAccountTokenReadOnly
 )
 from .serializers import (
     WSUserSerializer, OfferSerializer, FavoritesSerializer, SubscriptionsSerializer, AuthTokenSerializer
@@ -159,6 +160,7 @@ class WSUserViewSet(mixins.ListModelMixin,
 
 
 class Breeds(APIView):
+    permission_classes = [ServiceAccountTokenReadOnly]
     def get(self, request, format=None):
         try:
             subscribtion = request.query_params['breed']
