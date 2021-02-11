@@ -18,6 +18,7 @@ services:
     environment:
       PYTHONDONTWRITEBYTECODE: "true"
       DJANGO_SECRET_KEY: "ZjYyMjg0YmE0OTJkNjBhNDIyZDkyOTZkN2ZlZWI2ZmFhNDA0NmJmMDAzNmEwYTU2Cg=="
+      RECOMMENDER_BOT_TOKEN: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
       DJANGO_DEBUG: "True"
       DJANGO_ENVIRONMENT: "local"
       DJANGO_DATABASE_NAME: "app_microservice_dev"

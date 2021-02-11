@@ -24,7 +24,6 @@ def publish_messages(project_id, topic_id):
     """Publishes multiple messages to a Pub/Sub topic."""
     # [START pubsub_quickstart_publisher]
     # [START pubsub_publish]
-    from google.cloud import pubsub_v1
 
     # TODO(developer)
     # project_id = "your-project-id"
@@ -50,3 +49,4 @@ def publish_messages(project_id, topic_id):
 if __name__ == '__main__':
     create_topic(project_id="vet-shelter", topic_id="recommend")
     publish_messages(project_id="vet-shelter", topic_id="recommend")
+
