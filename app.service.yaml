@@ -23,6 +23,8 @@ spec:
           env:
             # - name: DJANGO_SUPERUSER_PASSWORD
             #   value: "root"
+            - name: RECOMMENDER_BOT_TOKEN
+              value: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
             - name: DJANGO_SECRET_KEY
               value: "OGFhMjM1M2U0MzM5ZTNkMTI5NTgwMTViOTE3ODkyNjc5NWViZjUwMTUzYWNhMTU0Cg=="
             - name: DJANGO_DATABASE_NAME
