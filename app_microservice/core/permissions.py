@@ -1,12 +1,15 @@
 from django.utils.encoding import smart_str
+
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS
-from app_microservice.app_microservice import settings
+
+from app_microservice import settings
 
 
 class WSUserPermission(permissions.BasePermission):
     """
-    Custom permission to only allow admins or the user itself to view a user-entry
+    Custom permission to only allow admins or the user itself to
+    view a user-entry
     """
     def has_object_permission(self, request, view, obj):
 
@@ -16,7 +19,8 @@ class WSUserPermission(permissions.BasePermission):
 
 class OfferPermission(permissions.BasePermission):
     """
-    Custom permission to only allow creators of an offer or admins to edit it
+    Custom permission to only allow creators of an offer
+    or admins to edit it
     """
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
@@ -25,12 +29,14 @@ class OfferPermission(permissions.BasePermission):
             return True
 
         # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return str(obj.published_by) == str(request.user) or request.user.is_staff
+        return str(obj.published_by
+                   ) == str(request.user) or request.user.is_staff
 
 
 class FavoritesPermission(permissions.BasePermission):
     """
-    Custom permission to only allow admins or the user itself to view a favorite-entry
+    Custom permission to only allow admins or the user itself to view
+    a favorite-entry
     """
     def has_object_permission(self, request, view, obj):
 
