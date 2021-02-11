@@ -24,7 +24,7 @@ class Images(APIView):
         try:
             storage_client = storage.Client()
             bucket = storage_client.bucket('wolkesiebenbucket')
-            blob = bucket.blob(request.data['name'])
+            blob = bucket.blob(request.query_params['name'])
             image = blob.download_as_text()
 
             return Response(image, status=status.HTTP_200_OK)
