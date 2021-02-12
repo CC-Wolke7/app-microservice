@@ -177,7 +177,7 @@ AUTH_USER_MODEL = "core.WSUser"
 
 # Service Tokens can authenticate for access to certain endpoints. They're
 # long-lived and used for machine-to-macine authorization.
-SERVICE_TOKEN_WHITELIST = []
+SERVICE_TOKEN_WHITELIST = [RECOMMENDER_BOT_TOKEN]
 
 # This is used to redirect logins for the API documentation views, which can be
 # accessed with session-based authentication, but require the user be an admin
