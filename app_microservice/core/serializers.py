@@ -18,16 +18,15 @@ class WSUserSerializer(serializers.ModelSerializer):
 
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
-    # def create (overwrite + super()) -> publisher aufrufen
     def create(self, data):
         super(OfferSerializer, self).create(data)
 
         print(data)
+        recommend_data = '{"breed": "schaeferhund"}'
         publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
-        json.dumps(data)
-        data = data.encode("utf-8")
-        publisher.publish(topic_path, data)
+        recommend_data = recommend_data.encode("utf-8")
+        publisher.publish(topic_path, recommend_data)
 
         print(f"Published messages to {topic_path}.")
 
