@@ -1,6 +1,5 @@
-FROM python:3.8-alpine
+FROM python:3.8
 
-RUN apk update && apk add --no-cache mariadb-dev libressl-dev libffi-dev g++ linux-headers musl-dev make
 RUN pip install pipenv==2020.11.15
 
 WORKDIR /app
@@ -11,9 +10,6 @@ ADD Pipfile Pipfile.lock ./
 # production builds, and get set to '--dev' for non-production builds.
 ARG pipenv_dev
 RUN pipenv install --deploy --system $pipenv_dev
-
-RUN apk del g++ mariadb-dev libressl-dev libffi-dev musl-dev linux-headers make && \
-    apk add --no-cache mariadb-connector-c libstdc++
 
 ENV DJANGO_ENVIRONMENT="production"
 COPY . ./
