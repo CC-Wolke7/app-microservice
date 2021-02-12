@@ -17,8 +17,6 @@ from .helper import getenv, netloc
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = getenv("DJANGO_SECRET_KEY")
 
-RECOMMENDER_BOT_TOKEN = getenv("RECOMMENDER_BOT_TOKEN")
-
 # SECURITY WARNING: don't run with debug turned on in production!
 # When Debug is enabled, Django will give detailed stack traces when there is
 # an error. Should be disabled in production.
@@ -177,7 +175,11 @@ AUTH_USER_MODEL = "core.WSUser"
 
 # Service Tokens can authenticate for access to certain endpoints. They're
 # long-lived and used for machine-to-macine authorization.
-SERVICE_TOKEN_WHITELIST = [RECOMMENDER_BOT_TOKEN]
+RECOMMENDER_BOT_TOKEN = getenv("RECOMMENDER_BOT_TOKEN")
+
+SERVICE_TOKEN_WHITELIST = [
+    RECOMMENDER_BOT_TOKEN,
+]
 
 # This is used to redirect logins for the API documentation views, which can be
 # accessed with session-based authentication, but require the user be an admin

@@ -52,12 +52,14 @@ class Favorites(models.Model):
 
     offers = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
+
 class Media(models.Model):
     offer = models.ForeignKey(
         Offer, related_name='media', on_delete=models.CASCADE
     )
 
     image = models.CharField(max_length=60)
+
 
 class Subscriptions(models.Model):
     user = models.ForeignKey(

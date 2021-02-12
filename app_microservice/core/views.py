@@ -10,38 +10,33 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
-from .models import WSUser, Offer, Favorites, Subscriptions
+from .models import Favorites, Offer, Subscriptions, WSUser
 from .permissions import (  # noqa
-    WSUserPermission, OfferPermission, FavoritesPermission,
-    ServiceAccountTokenReadOnly
+    FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
+    WSUserPermission
 )
 from .serializers import (
-    WSUserSerializer, OfferSerializer, FavoritesSerializer, SubscriptionsSerializer, AuthTokenSerializer
+    AuthTokenSerializer, FavoritesSerializer, OfferSerializer,
+    SubscriptionsSerializer, WSUserSerializer
 )
 
 
 class Images(APIView):
     def get(self, request, format=None):
-        try:
-            storage_client = storage.Client()
-            bucket = storage_client.bucket('wolkesiebenbucket')
-            blob = bucket.blob(request.query_params['name'])
-            image = blob.download_as_text()
+        storage_client = storage.Client()
+        bucket = storage_client.bucket('wolkesiebenbucket')
+        blob = bucket.blob(request.query_params['name'])
+        image = blob.download_as_text()
 
-            return Response(image, status=status.HTTP_200_OK)
-        except:  # noqa
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(image, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
-        try:
-            storage_client = storage.Client()
-            bucket = storage_client.bucket('wolkesiebenbucket')
-            blob = bucket.blob(request.data['name'])
-            blob.upload_from_string(request.data['image'])
+        storage_client = storage.Client()
+        bucket = storage_client.bucket('wolkesiebenbucket')
+        blob = bucket.blob(request.data['name'])
+        blob.upload_from_string(request.data['image'])
 
-            return Response(status=status.HTTP_200_OK)
-        except:  # noqa
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(status=status.HTTP_200_OK)
 
 
 class GoogleIdTokenLoginView(APIView):
@@ -135,8 +130,8 @@ class GoogleIdTokenLoginView(APIView):
         })
 
 
-class WSUserViewSet(mixins.ListModelMixin,
-    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+class WSUserViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     queryset = WSUser.objects.all()
@@ -146,33 +141,29 @@ class WSUserViewSet(mixins.ListModelMixin,
 
     @action(detail=True)
     def get_subscriptions(self, request, *args, **kwargs):
-        try:
-            subscriber = self.get_object()
-            subscriptions = Subscriptions.objects.filter(user=subscriber)
+        subscriber = self.get_object()
+        subscriptions = Subscriptions.objects.filter(user=subscriber)
 
-            result = []
-            for subscription in subscriptions:
-                result.append(subscription.breed)
+        result = []
+        for subscription in subscriptions:
+            result.append(subscription.breed)
 
-            return Response(result, status=status.HTTP_200_OK)
-        except:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class Breeds(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
+
     def get(self, request, format=None):
-        try:
-            subscribtion = request.query_params['breed']
-            subscribers = Subscriptions.objects.filter(breed=subscribtion)
+        subscribtion = request.query_params['breed']
+        subscribers = Subscriptions.objects.filter(breed=subscribtion)
 
-            result = []
-            for subscriber in subscribers:
-                result.append(subscriber.user.uuid)
+        result = []
 
-            return Response(result, status=status.HTTP_200_OK)
-        except:  # noqa
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        for subscriber in subscribers:
+            result.append(subscriber.user.uuid)
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class OfferViewSet(viewsets.ModelViewSet):
@@ -188,6 +179,7 @@ class FavoritesViewSet(
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
     permission_classes = [FavoritesPermission]
+
 
 class SubscriptionsViewSet(
     mixins.CreateModelMixin, mixins.RetrieveModelMixin,

@@ -1,6 +1,7 @@
-from google.auth import credentials
-from google.cloud import pubsub_v1
 import os
+
+# from google.auth import credentials
+from google.cloud import pubsub_v1
 
 
 def create_topic(project_id, topic_id):
@@ -38,8 +39,9 @@ def publish_messages(project_id, topic_id):
 
     # Data must be a bytestring
     data = data.encode("utf-8")
+
     # When you publish a message, the client returns a future.
-    future = publisher.publish(topic_path, data)
+    publisher.publish(topic_path, data)
 
     print(f"Published messages to {topic_path}.")
     # [END pubsub_quickstart_publisher]
@@ -49,4 +51,3 @@ def publish_messages(project_id, topic_id):
 if __name__ == '__main__':
     create_topic(project_id="vet-shelter", topic_id="recommend")
     publish_messages(project_id="vet-shelter", topic_id="recommend")
-

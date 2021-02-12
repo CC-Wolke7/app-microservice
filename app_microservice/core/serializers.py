@@ -1,13 +1,16 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import WSUser, Offer, Favorites, Subscriptions
+from .models import Favorites, Offer, Subscriptions, WSUser
 
 
 class WSUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = WSUser
-        fields = ['url', 'uuid', 'name', 'email', 'offers', 'favorites', 'subscriptions']
+        fields = [
+            'url', 'uuid', 'name', 'email', 'offers', 'favorites',
+            'subscriptions'
+        ]
         extra_kwargs = {'url': {'lookup_field': 'uuid'}}
 
 
