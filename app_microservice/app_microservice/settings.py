@@ -29,6 +29,7 @@ DEBUG = getenv("DJANGO_DEBUG", True)
 # Frontend (Ionic) and Backend (Django) URLs
 BACKEND_API_URL = getenv("DJANGO_API_URL", "http://localhost:8000")
 FRONTEND_APP_URL = getenv("DJANGO_FRONTEND_URL", "http://localhost:8100")
+
 STATIC_URL = f"{BACKEND_API_URL}/static/"
 
 # Only hosts which match this list are allowed to access the site when debug is
@@ -36,9 +37,9 @@ STATIC_URL = f"{BACKEND_API_URL}/static/"
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "host.docker.internal",
     netloc(BACKEND_API_URL),
     netloc(FRONTEND_APP_URL),
-    "host.docker.internal"
 ]
 
 # CORS

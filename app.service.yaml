@@ -34,9 +34,9 @@ spec:
             - name: DJANGO_DATABASE_HOST
               value: "/cloudsql/wolke-sieben-fs:europe-west3:app-storage"
             - name: DJANGO_API_URL
-              value: "https://app-api-xm7n7eaepa-ey.a.run.app"
-            # - name: DJANGO_FRONTEND_URL
-            # value: "" # @TODO
+              value: "https://app.cc-wolkesieben.de"
+            - name: DJANGO_FRONTEND_URL
+              value: "https://cc-wolkesieben.de"
             - name: RECOMMENDER_BOT_TOKEN
               value: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
   traffic:
