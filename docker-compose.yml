@@ -17,6 +17,8 @@ services:
       - db
     environment:
       PYTHONDONTWRITEBYTECODE: "true"
+      PROJECT_ID: "wolke-sieben-fs"
+      TOPIC_ID: "newOffer"
       DJANGO_SECRET_KEY: "ZjYyMjg0YmE0OTJkNjBhNDIyZDkyOTZkN2ZlZWI2ZmFhNDA0NmJmMDAzNmEwYTU2Cg=="
       DJANGO_DEBUG: "True"
       DJANGO_ENVIRONMENT: "local"
