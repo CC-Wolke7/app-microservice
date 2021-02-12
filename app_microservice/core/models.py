@@ -11,10 +11,10 @@ class WSUser(PermissionsMixin, AbstractBaseUser):
     uuid = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
     email = models.EmailField(unique=True, db_index=True)
     is_staff = models.BooleanField(default=False)
-    externalId = models.CharField(max_length=60)
-    signUpMethod = models.CharField(max_length=60)
-    description = models.CharField(max_length=200)
-    profileImageName = models.CharField(max_length=60)
+    externalId = models.CharField(max_length=255)
+    signUpMethod = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    profileImageName = models.CharField(max_length=255)
 
     objects = WSUserManager()
 
@@ -25,17 +25,17 @@ class WSUser(PermissionsMixin, AbstractBaseUser):
 
 class Offer(models.Model):
     uuid = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
-    name = models.CharField(max_length=60)
+    name = models.CharField(max_length=255)
     age = models.IntegerField()
-    species = models.CharField(max_length=60)
-    breed = models.CharField(max_length=60)
+    species = models.CharField(max_length=255)
+    breed = models.CharField(max_length=255)
     sex = models.CharField(max_length=1)
     sterile = models.BooleanField()
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=255)
     date_published = models.DateField()
-    place = models.CharField(max_length=200)
+    place = models.CharField(max_length=255)
     published_by = models.ForeignKey(
-        WSUser, related_name='offers', on_delete=models.CASCADE
+        WSUser, on_delete=models.CASCADE
     )
 
     def __str__(self):
@@ -47,23 +47,23 @@ class Offer(models.Model):
 
 class Favorites(models.Model):
     user = models.ForeignKey(
-        WSUser, related_name='favorites', on_delete=models.CASCADE
+        WSUser, on_delete=models.CASCADE
     )
 
-    offers = models.ForeignKey(Offer, on_delete=models.CASCADE)
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
 
 class Media(models.Model):
     offer = models.ForeignKey(
-        Offer, related_name='media', on_delete=models.CASCADE
+        Offer, on_delete=models.CASCADE
     )
 
-    image = models.CharField(max_length=60)
+    image = models.CharField(max_length=255)
 
 
 class Subscriptions(models.Model):
     user = models.ForeignKey(
-        WSUser, related_name='subscriptions', on_delete=models.CASCADE
+        WSUser, on_delete=models.CASCADE
     )
 
-    breed = models.CharField(max_length=60)
+    breed = models.CharField(max_length=255)

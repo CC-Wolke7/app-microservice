@@ -1,3 +1,5 @@
+from django.db import models
+
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -8,10 +10,11 @@ class WSUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = WSUser
         fields = [
-            'url', 'uuid', 'name', 'email', 'offers', 'favorites',
-            'subscriptions'
+            'url', 'uuid', 'name', 'email', 'is_staff', 'profileImageName'
         ]
-        extra_kwargs = {'url': {'lookup_field': 'uuid'}}
+        extra_kwargs = {
+            'url': {'lookup_field': 'uuid'}
+        }
 
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
@@ -19,16 +22,22 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         model = Offer
         fields = [
             'url', 'uuid', 'name', 'age', 'species', 'breed', 'sterile',
-            'description', 'date_published', 'published_by', 'media'
+            'description', 'date_published', 'published_by'
         ]
-        extra_kwargs = {'published_by': {'lookup_field': 'uuid'}}
+        extra_kwargs = {
+            'url': {'lookup_field': 'uuid'},
+            'published_by': {'lookup_field': 'uuid'}
+        }
 
 
 class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Favorites
-        fields = ['url', 'user', 'offers']
-        extra_kwargs = {'user': {'lookup_field': 'uuid'}}
+        fields = ['url', 'user', 'offer']
+        extra_kwargs = {
+            'user': {'lookup_field': 'uuid'},
+            'offer': {'lookup_field': 'uuid'}
+        }
 
 
 class SubscriptionsSerializer(serializers.HyperlinkedModelSerializer):

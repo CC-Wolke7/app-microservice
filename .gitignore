@@ -49,3 +49,4 @@ testcred.json
 createbucket.py
 listbuckets.py
 uploadtobucket.py
+/.cloudstorage

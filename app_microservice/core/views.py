@@ -4,13 +4,15 @@ from google.oauth2 import id_token
 
 from django.utils.encoding import smart_text
 
-from rest_framework import exceptions, mixins, permissions, status, viewsets
+from rest_framework import exceptions, mixins, permissions, status, viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
-from .models import Favorites, Offer, Subscriptions, WSUser
+from app_microservice import settings
+
+from .models import Favorites, Offer, Subscriptions, WSUser, Media
 from .permissions import (  # noqa
     FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
     WSUserPermission
@@ -21,22 +23,162 @@ from .serializers import (
 )
 
 
-class Images(APIView):
+def download_image(name):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket('wolkesiebenbucket')
+    blob = bucket.blob(name)
+    image = blob.download_as_text()
+
+    return image
+
+def upload_image(name, image):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket('wolkesiebenbucket')
+    blob = bucket.blob(name)
+    blob.upload_from_string(image)
+
+
+#TODO Remove ListModelMixin
+class WSUserViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = WSUser.objects.all()
+    serializer_class = WSUserSerializer
+    permission_classes = [WSUserPermission]
+    lookup_field = 'uuid'
+
+    # Offers
+
+    @action(detail=True)
+    def get_offers(self, request, *args, **kwargs):
+        offers = Offer.objects.filter(published_by=self.get_object())
+
+        result = []
+        for offer in offers:
+            result.append(offer.uuid)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    # Favorites
+
+    @action(detail=True)
+    def get_favorites(self, request, *args, **kwargs):
+        favorites = Favorites.objects.filter(user=self.get_object())
+
+        result = []
+        for favorite in favorites:
+            result.append(favorite.offer.uuid)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'])
+    def favorite(self, request, *args, **kwargs):
+        Favorites.objects.create(
+            user = self.get_object(),
+            offer = Offer.objects.get(uuid=request.data['offer'])
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    # Profile Image
+
+    @action(detail=True)
+    def get_profile_image(self, request, *args, **kwargs):
+        result = download_image(self.get_object().profileImageName)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['PUT'])
+    def upload_profile_image(self, request, *args, **kwargs):
+        WSUser.objects.filter(uuid=self.get_object().uuid).update(profileImageName = request.data['name'])
+        self.get_object().save()
+        upload_image(request.data['name'], request.data['image'])
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    # Subscriptions
+
+    @action(detail=True)
+    def get_subscriptions(self, request, *args, **kwargs):
+        subscriptions = Subscriptions.objects.filter(user=self.get_object())
+
+        result = []
+        for subscription in subscriptions:
+            result.append(subscription.breed)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'])
+    def subscription(self, request, *args, **kwargs):
+        Subscriptions.objects.create(
+            user = self.get_object(),
+            breed = request.data['breed']
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class OfferViewSet(viewsets.ModelViewSet):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+    permission_classes = [OfferPermission]
+    lookup_field = 'uuid'
+
+    # Images
+
+    @action(detail=True)
+    def get_images(self, request, *args, **kwargs):
+        result = []
+
+        for medium in Media.objects.filter(offer=self.get_object()):
+            result.append(download_image(medium.image))
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'])
+    def uploade_image(self, request, *args, **kwargs):
+        Media.objects.create(
+            offer=self.get_object(),
+            image=request.data['name']
+        )
+
+        upload_image(request.data['name'], request.data['image'])
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class FavoritesViewSet(
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = Favorites.objects.all()
+    serializer_class = FavoritesSerializer
+    permission_classes = [FavoritesPermission]
+    
+
+class SubscriptionsViewSet(
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = Subscriptions.objects.all()
+    serializer_class = SubscriptionsSerializer
+    permission_classes = [FavoritesPermission]
+
+
+class Breeds(APIView):
+    permission_classes = [ServiceAccountTokenReadOnly]
+
     def get(self, request, format=None):
-        storage_client = storage.Client()
-        bucket = storage_client.bucket('wolkesiebenbucket')
-        blob = bucket.blob(request.query_params['name'])
-        image = blob.download_as_text()
+        subscribtion = request.query_params['breed']
+        subscribers = Subscriptions.objects.filter(breed=subscribtion)
 
-        return Response(image, status=status.HTTP_200_OK)
+        result = []
 
-    def post(self, request, format=None):
-        storage_client = storage.Client()
-        bucket = storage_client.bucket('wolkesiebenbucket')
-        blob = bucket.blob(request.data['name'])
-        blob.upload_from_string(request.data['image'])
+        for subscriber in subscribers:
+            result.append(subscriber.user.uuid)
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class GoogleIdTokenLoginView(APIView):
@@ -85,17 +227,17 @@ class GoogleIdTokenLoginView(APIView):
             raise exceptions.NotAuthenticated()
 
         try:
-            google_id = id_token.verify_oauth2_token(
-                google_id_token,
-                requests.Request(),
-                '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
-            )
+            #google_id = id_token.verify_oauth2_token(
+            #    google_id_token,
+            #    requests.Request(),
+            #    '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
+            #)
 
-            # google_id = {
-            #    "sub": "123",
-            #    "name": "nik sauer",
-            #    "email": "nik.sauer@me.com"
-            # }
+            google_id = {
+               "sub": "123",
+               "name": "nik sauer",
+               "email": "nik.sauer@me.com"
+            }
         except:  # noqa
             raise exceptions.NotAuthenticated()
 
@@ -128,63 +270,3 @@ class GoogleIdTokenLoginView(APIView):
             'refresh': str(token_refresh),
             'access': str(token_refresh.access_token)
         })
-
-
-class WSUserViewSet(
-    mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    queryset = WSUser.objects.all()
-    serializer_class = WSUserSerializer
-    permission_classes = [WSUserPermission]
-    lookup_field = 'uuid'
-
-    @action(detail=True)
-    def get_subscriptions(self, request, *args, **kwargs):
-        subscriber = self.get_object()
-        subscriptions = Subscriptions.objects.filter(user=subscriber)
-
-        result = []
-        for subscription in subscriptions:
-            result.append(subscription.breed)
-
-        return Response(result, status=status.HTTP_200_OK)
-
-
-class Breeds(APIView):
-    permission_classes = [ServiceAccountTokenReadOnly]
-
-    def get(self, request, format=None):
-        subscribtion = request.query_params['breed']
-        subscribers = Subscriptions.objects.filter(breed=subscribtion)
-
-        result = []
-
-        for subscriber in subscribers:
-            result.append(subscriber.user.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
-
-
-class OfferViewSet(viewsets.ModelViewSet):
-    queryset = Offer.objects.all()
-    serializer_class = OfferSerializer
-    permission_classes = [OfferPermission]
-
-
-class FavoritesViewSet(
-    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    queryset = Favorites.objects.all()
-    serializer_class = FavoritesSerializer
-    permission_classes = [FavoritesPermission]
-
-
-class SubscriptionsViewSet(
-    mixins.CreateModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    queryset = Subscriptions.objects.all()
-    serializer_class = SubscriptionsSerializer
-    permission_classes = [FavoritesPermission]

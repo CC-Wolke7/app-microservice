@@ -17,7 +17,6 @@ router.register(r'subscriptions', views.SubscriptionsViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
-    path('images/', views.Images.as_view()),
     path('breed/', views.Breeds.as_view()),
     path(
         'api-auth/',
