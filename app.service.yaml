@@ -37,8 +37,14 @@ spec:
               value: "https://app.cc-wolkesieben.de"
             - name: DJANGO_FRONTEND_URL
               value: "https://cc-wolkesieben.de"
+            - name: GCP_PROJECT_ID
+              value: "wolke-sieben-fs"
+            - name: GOOGLE_OAUTH_AUDIENCE
+              value: "481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com"
             - name: RECOMMENDER_BOT_TOKEN
               value: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
+            - name: RECOMMENDER_BOT_TOPIC
+              value: "newOffer"
   traffic:
     - percent: 100
       latestRevision: true

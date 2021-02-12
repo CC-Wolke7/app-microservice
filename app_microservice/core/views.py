@@ -2,17 +2,16 @@ from google.auth.transport import requests
 from google.cloud import storage
 from google.oauth2 import id_token
 
+from django.conf import settings
 from django.utils.encoding import smart_text
 
-from rest_framework import exceptions, mixins, permissions, status, viewsets, generics
+from rest_framework import exceptions, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
-from app_microservice import settings
-
-from .models import Favorites, Offer, Subscriptions, WSUser, Media
+from .models import Favorites, Media, Offer, Subscriptions, WSUser
 from .permissions import (  # noqa
     FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
     WSUserPermission
@@ -31,6 +30,7 @@ def download_image(name):
 
     return image
 
+
 def upload_image(name, image):
     storage_client = storage.Client()
     bucket = storage_client.bucket('wolkesiebenbucket')
@@ -38,7 +38,7 @@ def upload_image(name, image):
     blob.upload_from_string(image)
 
 
-#TODO Remove ListModelMixin
+# TODO: Remove ListModelMixin
 class WSUserViewSet(
     mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
@@ -49,24 +49,24 @@ class WSUserViewSet(
     lookup_field = 'uuid'
 
     # Offers
-
     @action(detail=True)
     def get_offers(self, request, *args, **kwargs):
         offers = Offer.objects.filter(published_by=self.get_object())
 
         result = []
+
         for offer in offers:
             result.append(offer.uuid)
 
         return Response(result, status=status.HTTP_200_OK)
 
     # Favorites
-
     @action(detail=True)
     def get_favorites(self, request, *args, **kwargs):
         favorites = Favorites.objects.filter(user=self.get_object())
 
         result = []
+
         for favorite in favorites:
             result.append(favorite.offer.uuid)
 
@@ -75,14 +75,13 @@ class WSUserViewSet(
     @action(detail=True, methods=['POST'])
     def favorite(self, request, *args, **kwargs):
         Favorites.objects.create(
-            user = self.get_object(),
-            offer = Offer.objects.get(uuid=request.data['offer'])
+            user=self.get_object(),
+            offer=Offer.objects.get(uuid=request.data['offer'])
         )
 
         return Response(status=status.HTTP_201_CREATED)
 
     # Profile Image
-
     @action(detail=True)
     def get_profile_image(self, request, *args, **kwargs):
         result = download_image(self.get_object().profileImageName)
@@ -91,21 +90,23 @@ class WSUserViewSet(
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
-        WSUser.objects.filter(uuid=self.get_object().uuid).update(profileImageName = request.data['name'])
-        
-        strUuid = str(self.get_object().uuid)
-        strName = request.data['name']
-        upload_image(f"{strUuid}{strName}", request.data['image'])
+        WSUser.objects.filter(uuid=self.get_object().uuid
+                              ).update(profileImageName=request.data['name'])
+
+        user_uuid = str(self.get_object().uuid)
+        image_name = request.data['name']
+
+        upload_image(f"{user_uuid}{image_name}", request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
 
     # Subscriptions
-
     @action(detail=True)
     def get_subscriptions(self, request, *args, **kwargs):
         subscriptions = Subscriptions.objects.filter(user=self.get_object())
 
         result = []
+
         for subscription in subscriptions:
             result.append(subscription.breed)
 
@@ -114,8 +115,7 @@ class WSUserViewSet(
     @action(detail=True, methods=['POST'])
     def subscription(self, request, *args, **kwargs):
         Subscriptions.objects.create(
-            user = self.get_object(),
-            breed = request.data['breed']
+            user=self.get_object(), breed=request.data['breed']
         )
 
         return Response(status=status.HTTP_201_CREATED)
@@ -128,7 +128,6 @@ class OfferViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
 
     # Images
-
     @action(detail=True)
     def get_images(self, request, *args, **kwargs):
         result = []
@@ -139,15 +138,15 @@ class OfferViewSet(viewsets.ModelViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
-    def uploade_image(self, request, *args, **kwargs):
+    def upload_image(self, request, *args, **kwargs):
         Media.objects.create(
-            offer=self.get_object(),
-            image=request.data['name']
+            offer=self.get_object(), image=request.data['name']
         )
 
-        strUuid = str(self.get_object().uuid)
-        strName = request.data['name']
-        upload_image(f"{strUuid}{strName}", request.data['image'])
+        offer_uuid = str(self.get_object().uuid)
+        image_name = request.data['name']
+
+        upload_image(f"{offer_uuid}{image_name}", request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -159,7 +158,7 @@ class FavoritesViewSet(
     queryset = Favorites.objects.all()
     serializer_class = FavoritesSerializer
     permission_classes = [FavoritesPermission]
-    
+
 
 class SubscriptionsViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -231,17 +230,17 @@ class GoogleIdTokenLoginView(APIView):
             raise exceptions.NotAuthenticated()
 
         try:
-            #google_id = id_token.verify_oauth2_token(
-            #    google_id_token,
-            #    requests.Request(),
-            #    '481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com'  # noqa
-            #)
+            google_id = id_token.verify_oauth2_token(
+                google_id_token,
+                requests.Request(),
+                settings.GOOGLE_OAUTH_AUDIENCE,
+            )
 
-            google_id = {
-               "sub": "123",
-               "name": "nik sauer",
-               "email": "nik.sauer@me.com"
-            }
+            # google_id = {
+            #     "sub": "123",
+            #     "name": "nik sauer",
+            #     "email": "nik.sauer@me.com"
+            # }
         except:  # noqa
             raise exceptions.NotAuthenticated()
 

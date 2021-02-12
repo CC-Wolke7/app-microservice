@@ -13,9 +13,12 @@ from pathlib import Path
 
 from .helper import getenv, netloc
 
-# For recommendation publisher
-PROJECT_ID = getenv("PROJECT_ID")
-TOPIC_ID = getenv("TOPIC_ID")
+# Google Cloud Project
+GCP_PROJECT_ID = getenv("GCP_PROJECT_ID")
+
+# Recommender Bot
+RECOMMENDER_BOT_TOPIC = getenv("RECOMMENDER_BOT_TOPIC")
+RECOMMENDER_BOT_TOKEN = getenv("RECOMMENDER_BOT_TOKEN")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -179,10 +182,11 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 AUTH_USER_MODEL = "core.WSUser"
 
-# Service Tokens can authenticate for access to certain endpoints. They're
-# long-lived and used for machine-to-macine authorization.
-RECOMMENDER_BOT_TOKEN = getenv("RECOMMENDER_BOT_TOKEN")
+# Social Auth
+GOOGLE_OAUTH_AUDIENCE = getenv("GOOGLE_OAUTH_AUDIENCE")
 
+# Service Tokens can authenticate for access to certain endpoints. They're
+# long-lived and used for machine-to-machine authorization.
 SERVICE_TOKEN_WHITELIST = [
     RECOMMENDER_BOT_TOKEN,
 ]

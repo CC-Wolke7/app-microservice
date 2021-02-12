@@ -34,9 +34,7 @@ class Offer(models.Model):
     description = models.CharField(max_length=255)
     date_published = models.DateField()
     place = models.CharField(max_length=255)
-    published_by = models.ForeignKey(
-        WSUser, on_delete=models.CASCADE
-    )
+    published_by = models.ForeignKey(WSUser, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -46,24 +44,18 @@ class Offer(models.Model):
 
 
 class Favorites(models.Model):
-    user = models.ForeignKey(
-        WSUser, on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(WSUser, on_delete=models.CASCADE)
 
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
 
 class Media(models.Model):
-    offer = models.ForeignKey(
-        Offer, on_delete=models.CASCADE
-    )
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
     image = models.CharField(max_length=255)
 
 
 class Subscriptions(models.Model):
-    user = models.ForeignKey(
-        WSUser, on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(WSUser, on_delete=models.CASCADE)
 
     breed = models.CharField(max_length=255)

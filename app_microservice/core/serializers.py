@@ -1,12 +1,11 @@
-from django.db import models
+from google.cloud import pubsub_v1
+
+from django.conf import settings
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from google.cloud import pubsub_v1
-import json
 
 from .models import Favorites, Offer, Subscriptions, WSUser
-from ..app_microservice.settings import PROJECT_ID, TOPIC_ID
 
 
 class WSUserSerializer(serializers.ModelSerializer):
@@ -15,9 +14,7 @@ class WSUserSerializer(serializers.ModelSerializer):
         fields = [
             'url', 'uuid', 'name', 'email', 'is_staff', 'profileImageName'
         ]
-        extra_kwargs = {
-            'url': {'lookup_field': 'uuid'}
-        }
+        extra_kwargs = {'url': {'lookup_field': 'uuid'}}
 
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
@@ -27,7 +24,9 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         print(data)
         recommend_data = '{"breed": "schaeferhund"}'
         publisher = pubsub_v1.PublisherClient()
-        topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
+        topic_path = publisher.topic_path(
+            settings.PROJECT_ID, settings.TOPIC_ID
+        )
         recommend_data = recommend_data.encode("utf-8")
         publisher.publish(topic_path, recommend_data)
 
@@ -40,8 +39,12 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
             'description', 'date_published', 'published_by'
         ]
         extra_kwargs = {
-            'url': {'lookup_field': 'uuid'},
-            'published_by': {'lookup_field': 'uuid'}
+            'url': {
+                'lookup_field': 'uuid'
+            },
+            'published_by': {
+                'lookup_field': 'uuid'
+            }
         }
 
 
@@ -50,8 +53,12 @@ class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
         model = Favorites
         fields = ['url', 'user', 'offer']
         extra_kwargs = {
-            'user': {'lookup_field': 'uuid'},
-            'offer': {'lookup_field': 'uuid'}
+            'user': {
+                'lookup_field': 'uuid'
+            },
+            'offer': {
+                'lookup_field': 'uuid'
+            }
         }
 
 
