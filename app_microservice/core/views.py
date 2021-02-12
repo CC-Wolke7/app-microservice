@@ -92,8 +92,10 @@ class WSUserViewSet(
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
         WSUser.objects.filter(uuid=self.get_object().uuid).update(profileImageName = request.data['name'])
-        self.get_object().save()
-        upload_image(request.data['name'], request.data['image'])
+        
+        strUuid = str(self.get_object().uuid)
+        strName = request.data['name']
+        upload_image(f"{strUuid}{strName}", request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -143,7 +145,9 @@ class OfferViewSet(viewsets.ModelViewSet):
             image=request.data['name']
         )
 
-        upload_image(request.data['name'], request.data['image'])
+        strUuid = str(self.get_object().uuid)
+        strName = request.data['name']
+        upload_image(f"{strUuid}{strName}", request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
 
