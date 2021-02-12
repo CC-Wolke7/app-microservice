@@ -13,6 +13,10 @@ from pathlib import Path
 
 from .helper import getenv, netloc
 
+# For recommendation publisher
+PROJECT_ID = getenv("PROJECT_ID")
+TOPIC_ID = getenv("TOPIC_ID")
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = getenv("DJANGO_SECRET_KEY")
@@ -34,6 +38,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     netloc(BACKEND_API_URL),
     netloc(FRONTEND_APP_URL),
+    "host.docker.internal"
 ]
 
 # CORS

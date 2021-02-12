@@ -1,18 +1,11 @@
 import os
-
-# from google.auth import credentials
 from google.cloud import pubsub_v1
 
-
-def create_topic(project_id, topic_id):
-    """Create a new Pub/Sub topic."""
-    # [START pubsub_quickstart_create_topic]
-    # [START pubsub_create_topic]
-
-    print(os.environ.get('PUBSUB_EMULATOR_HOST'))
+"""
+def create_topic():
 
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_id)
+    # topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
 
     topic = publisher.create_topic(request={"name": topic_path})
 
@@ -22,7 +15,7 @@ def create_topic(project_id, topic_id):
 
 
 def publish_messages(project_id, topic_id):
-    """Publishes multiple messages to a Pub/Sub topic."""
+
     # [START pubsub_quickstart_publisher]
     # [START pubsub_publish]
 
@@ -51,3 +44,4 @@ def publish_messages(project_id, topic_id):
 if __name__ == '__main__':
     create_topic(project_id="vet-shelter", topic_id="recommend")
     publish_messages(project_id="vet-shelter", topic_id="recommend")
+"""
