@@ -129,14 +129,17 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'])
     def upload_image(self, request, *args, **kwargs):
-        Media.objects.create(
-            offer=self.get_object(), image=request.data['name']
-        )
+        offer = self.get_object()
+        offer_uuid = str(offer.uuid)
 
-        offer_uuid = str(self.get_object().uuid)
+        image = request.data['image']
+
         image_name = request.data['name']
+        stored_image_name = f"{offer_uuid}{image_name}"
 
-        upload_image(f"{offer_uuid}{image_name}", request.data['image'])
+        upload_image(stored_image_name, image)
+
+        Media.objects.create(offer, image=stored_image_name)
 
         return Response(status=status.HTTP_201_CREATED)
 
