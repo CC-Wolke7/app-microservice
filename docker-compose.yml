@@ -26,11 +26,11 @@ services:
       DJANGO_DATABASE_HOST: "db"
       DJANGO_DATABASE_PORT: 3306
       GCP_PROJECT_ID: "vet-shelter"
+      GCP_BUCKET: "app-media-bucket"
       GOOGLE_OAUTH_AUDIENCE: "481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com"
       RECOMMENDER_BOT_TOKEN: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
       RECOMMENDER_BOT_TOPIC: "newOffer"
-      STORAGE_EMULATOR_HOST: "http://host.docker.internal:9090"
-      GOOGLE_APPLICATION_CREDENTIALS: "/app/testcred.json"
+      STORAGE_EMULATOR_HOST: "http://gcp-storage:8080"
     command: --reload --log-level=info
 
   # ----
@@ -44,3 +44,11 @@ services:
       MYSQL_DATABASE: "app_microservice_dev"
     expose:
       - 3306
+
+  # ----
+  # Google Cloud Storage
+  gcp-storage:
+    image: fsouza/fake-gcs-server
+    expose:
+      - 8080
+    command: -scheme http -port 8080

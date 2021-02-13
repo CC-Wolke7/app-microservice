@@ -15,6 +15,7 @@ from .helper import getenv, netloc
 
 # Google Cloud Project
 GCP_PROJECT_ID = getenv("GCP_PROJECT_ID")
+GCP_BUCKET = getenv("GCP_BUCKET")
 
 # Recommender Bot
 RECOMMENDER_BOT_TOPIC = getenv("RECOMMENDER_BOT_TOPIC")
