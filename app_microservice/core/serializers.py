@@ -36,7 +36,7 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         model = Offer
         fields = [
             'url', 'uuid', 'name', 'age', 'species', 'breed', 'sterile',
-            'description', 'date_published', 'published_by'
+            'description', 'date_published', 'published_by', 'sex'
         ]
         extra_kwargs = {
             'url': {

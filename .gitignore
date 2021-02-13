@@ -45,7 +45,7 @@ __pycache__/
 *.sqlite3
 media
 
-testcred.json
+#testcred.json
 createbucket.py
 listbuckets.py
 uploadtobucket.py
