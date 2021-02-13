@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .models import Favorites, Media, Offer, Subscriptions, WSUser
+from .choices import Breed
 from .permissions import (  # noqa
     FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
     WSUserPermission
@@ -180,6 +181,30 @@ class Breeds(APIView):
 
         for subscriber in subscribers:
             result.append(subscriber.user.uuid)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+class Species(APIView):
+    permission_classes = [ServiceAccountTokenReadOnly]
+
+    def get(self, request, format=None):
+        species = request.query_params['species']
+        result = []
+        
+        if species == 'Dog':
+            result.append(Breed.JACK_RUSSEL)
+
+        if species == 'Cat':
+            result.append(Breed.PERSIAN)
+        
+        if species == 'Shark':
+            result.append(Breed.WHITE_SHARK)
+
+        if species == 'Dinosaur':
+            result.append(Breed.KAWUK)
+
+        if not result:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(result, status=status.HTTP_200_OK)
 

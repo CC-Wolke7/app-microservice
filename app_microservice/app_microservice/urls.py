@@ -18,6 +18,7 @@ router.register(r'subscriptions', views.SubscriptionsViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('breed/', views.Breeds.as_view()),
+    path('species/', views.Species.as_view()),
     path(
         'api-auth/',
         include('rest_framework.urls', namespace='rest_framework')
