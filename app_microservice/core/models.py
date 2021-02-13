@@ -24,11 +24,24 @@ class WSUser(PermissionsMixin, AbstractBaseUser):
 
 
 class Offer(models.Model):
+
+    class Species(models.TextChoices):
+        DOG = 'Dog'
+        CAT = 'Cat'
+        SHARK = 'Shark'
+        DINOSAUR = 'Dinosaur'
+    
+    class Breed(models.TextChoices):
+        JACK_RUSSEL = 'Jack Russel'
+        PERSIAN = 'Persian'
+        WHITE_SHARK = 'White Shark'
+        KAWUK = 'Kawuk'
+
     uuid = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
     age = models.IntegerField()
-    species = models.CharField(max_length=255)
-    breed = models.CharField(max_length=255)
+    species = models.CharField(max_length=255, choices=Species.choices)
+    breed = models.CharField(max_length=255, choices=Breed.choices)
     sex = models.CharField(max_length=1)
     sterile = models.BooleanField()
     description = models.CharField(max_length=255)
