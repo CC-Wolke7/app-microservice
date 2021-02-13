@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .models import Favorites, Media, Offer, Subscriptions, WSUser
-from .choices import Breed
+from .choices import Species, Breed
 from .permissions import (  # noqa
     FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
     WSUserPermission
@@ -170,7 +170,7 @@ class SubscriptionsViewSet(
     permission_classes = [FavoritesPermission]
 
 
-class Breeds(APIView):
+class BreedsView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
@@ -184,24 +184,30 @@ class Breeds(APIView):
 
         return Response(result, status=status.HTTP_200_OK)
 
-class Species(APIView):
+class SpeciesView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
         species = request.query_params['species']
         result = []
         
-        if species == 'Dog':
+        if species == 'dog':
             result.append(Breed.JACK_RUSSEL)
 
-        if species == 'Cat':
+        if species == 'cat':
             result.append(Breed.PERSIAN)
         
-        if species == 'Shark':
+        if species == 'shark':
             result.append(Breed.WHITE_SHARK)
 
-        if species == 'Dinosaur':
+        if species == 'dinosaur':
             result.append(Breed.KAWUK)
+
+        if species == 'all'
+            result.append(Species.DOG)
+            result.append(Species.CAT)
+            result.append(Species.SHARK)
+            result.append(Species.DINOSAUR)
 
         if not result:
             return Response(status=status.HTTP_404_NOT_FOUND)
