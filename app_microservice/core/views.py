@@ -1,5 +1,4 @@
 from google.auth.transport import requests
-from google.cloud import storage
 from google.oauth2 import id_token
 
 from django.conf import settings
@@ -11,8 +10,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
+from .bucket import download_image, upload_image
+from .choices import Breed, Species
 from .models import Favorites, Media, Offer, Subscriptions, WSUser
-from .choices import Species, Breed
 from .permissions import (  # noqa
     FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
     WSUserPermission
@@ -21,22 +21,6 @@ from .serializers import (
     AuthTokenSerializer, FavoritesSerializer, OfferSerializer,
     SubscriptionsSerializer, WSUserSerializer
 )
-
-
-def download_image(name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket('wolkesiebenbucket')
-    blob = bucket.blob(name)
-    image = blob.download_as_text()
-
-    return image
-
-
-def upload_image(name, image):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket('wolkesiebenbucket')
-    blob = bucket.blob(name)
-    blob.upload_from_string(image)
 
 
 # TODO: Remove ListModelMixin
@@ -91,13 +75,18 @@ class WSUserViewSet(
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
-        WSUser.objects.filter(uuid=self.get_object().uuid
-                              ).update(profileImageName=request.data['name'])
+        user = self.get_object()
+        user_uuid = str(user.uuid)
 
-        user_uuid = str(self.get_object().uuid)
+        image = request.data['image']
+
         image_name = request.data['name']
+        stored_image_name = f"{user_uuid}{image_name}"
 
-        upload_image(f"{user_uuid}{image_name}", request.data['image'])
+        upload_image(stored_image_name, image)
+
+        user.profileImageName = stored_image_name
+        user.save()
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -184,19 +173,20 @@ class BreedsView(APIView):
 
         return Response(result, status=status.HTTP_200_OK)
 
+
 class SpeciesView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
         species = request.query_params['species']
         result = []
-        
+
         if species == 'dog':
             result.append(Breed.JACK_RUSSEL)
 
         if species == 'cat':
             result.append(Breed.PERSIAN)
-        
+
         if species == 'shark':
             result.append(Breed.WHITE_SHARK)
 
