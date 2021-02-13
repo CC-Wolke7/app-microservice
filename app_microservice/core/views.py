@@ -12,25 +12,25 @@ from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .bucket import download_image, upload_image
 from .choices import Breed, Species
-from .models import Favorites, Media, Offer, Subscriptions, WSUser
-from .permissions import (  # noqa
-    FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
-    WSUserPermission
+from .models import Favorite, Media, Offer, Subscription, User
+from .permissions import (
+    FavoritePermission, OfferPermission, ServiceAccountTokenReadOnly,
+    UserPermission
 )
 from .serializers import (
-    AuthTokenSerializer, FavoritesSerializer, OfferSerializer,
-    SubscriptionsSerializer, WSUserSerializer
+    AuthTokenSerializer, FavoriteSerializer, OfferSerializer,
+    SubscriptionSerializer, UserSerializer
 )
 
 
 # TODO: Remove ListModelMixin
-class WSUserViewSet(
+class UserViewSet(
     mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = WSUser.objects.all()
-    serializer_class = WSUserSerializer
-    permission_classes = [WSUserPermission]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [UserPermission]
     lookup_field = 'uuid'
 
     # Offers
@@ -48,7 +48,7 @@ class WSUserViewSet(
     # Favorites
     @action(detail=True)
     def get_favorites(self, request, *args, **kwargs):
-        favorites = Favorites.objects.filter(user=self.get_object())
+        favorites = Favorite.objects.filter(user=self.get_object())
 
         result = []
 
@@ -59,7 +59,7 @@ class WSUserViewSet(
 
     @action(detail=True, methods=['POST'])
     def favorite(self, request, *args, **kwargs):
-        Favorites.objects.create(
+        Favorite.objects.create(
             user=self.get_object(),
             offer=Offer.objects.get(uuid=request.data['offer'])
         )
@@ -69,9 +69,9 @@ class WSUserViewSet(
     # Profile Image
     @action(detail=True)
     def get_profile_image(self, request, *args, **kwargs):
-        result = download_image(self.get_object().profileImageName)
+        image = download_image(self.get_object().profile_image_name)
 
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(image, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
@@ -85,7 +85,7 @@ class WSUserViewSet(
 
         upload_image(stored_image_name, image)
 
-        user.profileImageName = stored_image_name
+        user.profile_image_name = stored_image_name
         user.save()
 
         return Response(status=status.HTTP_201_CREATED)
@@ -93,7 +93,7 @@ class WSUserViewSet(
     # Subscriptions
     @action(detail=True)
     def get_subscriptions(self, request, *args, **kwargs):
-        subscriptions = Subscriptions.objects.filter(user=self.get_object())
+        subscriptions = Subscription.objects.filter(user=self.get_object())
 
         result = []
 
@@ -104,7 +104,7 @@ class WSUserViewSet(
 
     @action(detail=True, methods=['POST'])
     def subscription(self, request, *args, **kwargs):
-        Subscriptions.objects.create(
+        Subscription.objects.create(
             user=self.get_object(), breed=request.data['breed']
         )
 
@@ -120,12 +120,12 @@ class OfferViewSet(viewsets.ModelViewSet):
     # Images
     @action(detail=True)
     def get_images(self, request, *args, **kwargs):
-        result = []
+        images = []
 
         for medium in Media.objects.filter(offer=self.get_object()):
-            result.append(download_image(medium.image))
+            images.append(download_image(medium.image))
 
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(images, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def upload_image(self, request, *args, **kwargs):
@@ -144,35 +144,36 @@ class OfferViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class FavoritesViewSet(
+class FavoriteViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Favorites.objects.all()
-    serializer_class = FavoritesSerializer
-    permission_classes = [FavoritesPermission]
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+    permission_classes = [FavoritePermission]
 
 
-class SubscriptionsViewSet(
+class SubscriptionViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Subscriptions.objects.all()
-    serializer_class = SubscriptionsSerializer
-    permission_classes = [FavoritesPermission]
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    permission_classes = [FavoritePermission]
 
 
-class BreedsView(APIView):
+class BreedView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
-        subscribtion = request.query_params['breed']
-        subscribers = Subscriptions.objects.filter(breed=subscribtion)
+        subscriptions = Subscription.objects.filter(
+            breed=request.query_params['breed']
+        )
 
         result = []
 
-        for subscriber in subscribers:
-            result.append(subscriber.user.uuid)
+        for subscription in subscriptions:
+            result.append(subscription.user.uuid)
 
         return Response(result, status=status.HTTP_200_OK)
 
@@ -261,9 +262,9 @@ class GoogleIdTokenLoginView(APIView):
             )
 
             # google_id = {
-            #     "sub": "123",
+            #     "sub": "3ef9c7a3-1333-44b2-b1ed-40eefa96ccdb",
             #     "name": "nik sauer",
-            #     "email": "nik.sauer@me.com"
+            #     "email": "nik.sauer@mes.com"
             # }
         except:  # noqa
             raise exceptions.NotAuthenticated()
@@ -271,10 +272,10 @@ class GoogleIdTokenLoginView(APIView):
         user_id = google_id["sub"]
 
         try:
-            user = WSUser.objects.all().get(
-                externalId=user_id, signUpMethod='google'
+            user = User.objects.all().get(
+                external_id=user_id, signup_method='google'
             )
-        except WSUser.DoesNotExist:
+        except User.DoesNotExist:
             name = google_id.get("name")
             email = google_id.get("email")
 
@@ -284,11 +285,11 @@ class GoogleIdTokenLoginView(APIView):
                     detail='Name and email are required Google ID claims.'
                 )
 
-            user = WSUser.objects.create(
+            user = User.objects.create(
                 name=name,
                 email=email,
-                externalId=user_id,
-                signUpMethod='google'
+                external_id=user_id,
+                signup_method='google'
             )
 
         token_refresh = AuthTokenSerializer.get_token(user)

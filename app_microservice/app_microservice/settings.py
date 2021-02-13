@@ -181,7 +181,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
-AUTH_USER_MODEL = "core.WSUser"
+AUTH_USER_MODEL = "core.User"
 
 # Social Auth
 GOOGLE_OAUTH_AUDIENCE = getenv("GOOGLE_OAUTH_AUDIENCE")

@@ -1,10 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import WSUser
+from .models import User
 
 
-class WSUserAdmin(UserAdmin):
+class UserAdmin(UserAdmin):
     readonly_fields = ["uuid"]
     ordering = ["name"]
 
@@ -36,4 +36,4 @@ class WSUserAdmin(UserAdmin):
     ]
 
 
-admin.site.register(WSUser, WSUserAdmin)
+admin.site.register(User, UserAdmin)
