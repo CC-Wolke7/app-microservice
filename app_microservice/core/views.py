@@ -203,7 +203,7 @@ class SpeciesView(APIView):
         if species == 'dinosaur':
             result.append(Breed.KAWUK)
 
-        if species == 'all'
+        if species == 'all':
             result.append(Species.DOG)
             result.append(Species.CAT)
             result.append(Species.SHARK)

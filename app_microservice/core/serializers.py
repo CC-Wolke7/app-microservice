@@ -1,4 +1,4 @@
-from google.cloud import pubsub_v1
+#from google.cloud import pubsub_v1
 
 from django.conf import settings
 
@@ -18,6 +18,7 @@ class WSUserSerializer(serializers.ModelSerializer):
 
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
+    """
     def create(self, data):
         super(OfferSerializer, self).create(data)
 
@@ -31,7 +32,7 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         publisher.publish(topic_path, recommend_data)
 
         print(f"Published messages to {topic_path}.")
-
+    """
     class Meta:
         model = Offer
         fields = [
