@@ -6,7 +6,7 @@ from rest_framework.permissions import SAFE_METHODS
 from app_microservice import settings
 
 
-class WSUserPermission(permissions.BasePermission):
+class UserPermission(permissions.BasePermission):
     """
     Custom permission to only allow admins or the user itself to
     view a user-entry
@@ -37,7 +37,7 @@ class OfferPermission(permissions.BasePermission):
                    ) == str(request.user) or request.user.is_staff
 
 
-class FavoritesPermission(permissions.BasePermission):
+class FavoritePermission(permissions.BasePermission):
     """
     Custom permission to only allow admins or the user itself to view
     a favorite-entry

@@ -1,17 +1,18 @@
 from google.cloud import pubsub_v1
 
+# from django.conf import settings
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Favorites, Offer, Subscriptions, WSUser
+from .models import Favorite, Offer, Subscription, User
 
 
-class WSUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WSUser
+        model = User
         fields = [
-            'url', 'uuid', 'name', 'email', 'is_staff', 'profileImageName'
+            'url', 'uuid', 'name', 'email', 'is_staff', 'profile_image_name'
         ]
         extra_kwargs = {'url': {'lookup_field': 'uuid'}}
 
@@ -47,9 +48,9 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
-class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
+class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Favorites
+        model = Favorite
         fields = ['url', 'user', 'offer']
         extra_kwargs = {
             'user': {
@@ -61,9 +62,9 @@ class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
-class SubscriptionsSerializer(serializers.HyperlinkedModelSerializer):
+class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Subscriptions
+        model = Subscription
         fields = ['url', 'user', 'breed']
         extra_kwargs = {'user': {'lookup_field': 'uuid'}}
 

@@ -15,6 +15,7 @@ from .helper import getenv, netloc
 
 # Google Cloud Project
 GCP_PROJECT_ID = getenv("GCP_PROJECT_ID")
+GCP_BUCKET = getenv("GCP_BUCKET")
 
 # Recommender Bot
 RECOMMENDER_BOT_TOPIC = getenv("RECOMMENDER_BOT_TOPIC")
@@ -22,12 +23,13 @@ RECOMMENDER_BOT_TOKEN = getenv("RECOMMENDER_BOT_TOKEN")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # When Debug is enabled, Django will give detailed stack traces when there is
 # an error. Should be disabled in production.
 DEBUG = getenv("DJANGO_DEBUG", True)
+
+ENVIRONMENT = getenv("DJANGO_ENVIRONMENT")
 
 # Frontend (Ionic) and Backend (Django) URLs
 BACKEND_API_URL = getenv("DJANGO_API_URL", "http://localhost:8000")
@@ -121,8 +123,11 @@ REST_FRAMEWORK = {
 }
 
 # JWT
+SECRET_KEY = getenv("DJANGO_SECRET_KEY")
+ACCESS_TOKEN_LIFETIME_MINUTES = int(getenv("DJANGO_ACCESS_TOKEN_LIFETIME", 15))
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -180,7 +185,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
-AUTH_USER_MODEL = "core.WSUser"
+AUTH_USER_MODEL = "core.User"
 
 # Social Auth
 GOOGLE_OAUTH_AUDIENCE = getenv("GOOGLE_OAUTH_AUDIENCE")
