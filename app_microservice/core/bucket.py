@@ -6,10 +6,12 @@ from django.conf import settings
 project_id = settings.GCP_PROJECT_ID
 bucket_name = settings.GCP_BUCKET
 
-client = storage.Client(
-    project=project_id,
-    credentials=AnonymousCredentials(),
-)
+options = dict(project=project_id)
+
+if settings.ENVIRONMENT != "production":
+    options["credentials"] = AnonymousCredentials()
+
+client = storage.Client(**options)
 
 bucket = client.bucket(bucket_name)
 

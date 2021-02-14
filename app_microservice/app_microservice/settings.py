@@ -23,12 +23,15 @@ RECOMMENDER_BOT_TOKEN = getenv("RECOMMENDER_BOT_TOKEN")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 SECRET_KEY = getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # When Debug is enabled, Django will give detailed stack traces when there is
 # an error. Should be disabled in production.
 DEBUG = getenv("DJANGO_DEBUG", True)
+
+ENVIRONMENT = getenv("DJANGO_ENVIRONMENT")
 
 # Frontend (Ionic) and Backend (Django) URLs
 BACKEND_API_URL = getenv("DJANGO_API_URL", "http://localhost:8000")

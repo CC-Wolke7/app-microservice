@@ -21,8 +21,8 @@ spec:
           ports:
             - containerPort: 8000
           env:
-            # - name: DJANGO_SUPERUSER_PASSWORD
-            #   value: "root"
+            - name: DJANGO_ENVIRONMENT
+              value: "production"
             - name: DJANGO_SECRET_KEY
               value: "OGFhMjM1M2U0MzM5ZTNkMTI5NTgwMTViOTE3ODkyNjc5NWViZjUwMTUzYWNhMTU0Cg=="
             - name: DJANGO_DATABASE_NAME
