@@ -2,6 +2,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 
 from django.conf import settings
+from django.db import IntegrityError
 from django.utils.encoding import smart_text
 
 from rest_framework import exceptions, mixins, permissions, status, viewsets
@@ -59,10 +60,16 @@ class UserViewSet(
 
     @action(detail=True, methods=['POST'])
     def favorite(self, request, *args, **kwargs):
-        Favorite.objects.create(
-            user=self.get_object(),
-            offer=Offer.objects.get(uuid=request.data['offer'])
-        )
+        try:
+            offer = Offer.objects.get(uuid=request.data['offer'])
+        except Offer.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            Favorite.objects.create(user=self.get_object(), offer=offer)
+        except IntegrityError:
+            # favorite already exists
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 
