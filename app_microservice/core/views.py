@@ -39,6 +39,13 @@ def upload_image(name, image):
     blob.upload_from_string(image)
 
 
+def delete_image(name):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket('wolkesiebenbucket')
+    blob = bucket.blob(name)
+    blob.delete()
+
+
 # TODO: Remove ListModelMixin
 class WSUserViewSet(
     mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
@@ -82,6 +89,15 @@ class WSUserViewSet(
 
         return Response(status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['DELETE'])
+    def delete_favorite(self, request, *args, **kwargs):
+        Favorites.objects.get(
+            user=self.get_object(),
+            offer=Offer.objects.get(uuid=request.data['offer'])
+        ).delete()
+
+        return Response(status=status.HTTP_200_OK)
+
     # Profile Image
     @action(detail=True)
     def get_profile_image(self, request, *args, **kwargs):
@@ -91,15 +107,26 @@ class WSUserViewSet(
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
-        WSUser.objects.filter(uuid=self.get_object().uuid
-                              ).update(profileImageName=request.data['name'])
-
         user_uuid = str(self.get_object().uuid)
         image_name = request.data['name']
+        
+        WSUser.objects.filter(uuid=self.get_object().uuid).update(profileImageName=f"{user_uuid}_{image_name}")
 
-        upload_image(f"{user_uuid}{image_name}", request.data['image'])
+        upload_image(f"{user_uuid}_{image_name}", request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['DELETE'])
+    def delete_profile_image(self, request, *args, **kwargs):
+        user_uuid = str(self.get_object().uuid)
+        image_name = self.get_object().profileImageName
+
+        delete_iamge(f"{user_uuid}_{image_name}")
+
+        WSUser.objects.filter(uuid=self.get_object().uuid
+                              ).update(profileImageName='')
+        
+        return Response(status=status.HTTP_200_OK)
 
     # Subscriptions
     @action(detail=True)
@@ -121,6 +148,14 @@ class WSUserViewSet(
 
         return Response(status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['DELETE'])
+    def delete_subscription(self, request, *args, **kwargs):
+        Subscriptions.objects.get(
+            user=self.get_object(), breed=request.data['breed']
+        ).delete()
+
+        return Response(status=status.HTTP_200_OK)
+
 
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
@@ -140,16 +175,29 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'])
     def upload_image(self, request, *args, **kwargs):
+        offer_uuid = str(self.get_object().uuid)
+        image_name = request.data['name']
+
+        upload_image(f"{offer_uuid}_{image_name}", request.data['image'])
+
         Media.objects.create(
-            offer=self.get_object(), image=request.data['name']
+            offer=self.get_object(), image=f"{offer_uuid}_{image_name}"
         )
+
+        return Response(status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['DELETE'])
+    def delete_image(self, request, *args, **kwargs):
+        Media.objects.get(
+            offer=self.get_object(), image=request.data['name']
+        ).delete()
 
         offer_uuid = str(self.get_object().uuid)
         image_name = request.data['name']
 
-        upload_image(f"{offer_uuid}{image_name}", request.data['image'])
+        delete_image(f"{offer_uuid}_{image_name}")
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK)
 
 
 class FavoritesViewSet(
