@@ -1,6 +1,10 @@
 from django.db import models
 
 
+class SocialLogin(models.TextChoices):
+    Google = "google"
+
+
 class Species(models.TextChoices):
     DOG = 'Dog'
     CAT = 'Cat'
@@ -13,6 +17,22 @@ class Breed(models.TextChoices):
     PERSIAN = 'Persian'
     WHITE_SHARK = 'White Shark'
     KAWUK = 'Kawuk'
+
+
+BREEDS_FOR_SPECIES = {
+    Species.DOG: [
+        Breed.JACK_RUSSEL,
+    ],
+    Species.CAT: [
+        Breed.PERSIAN,
+    ],
+    Species.SHARK: [
+        Breed.WHITE_SHARK,
+    ],
+    Species.DINOSAUR: [
+        Breed.KAWUK,
+    ]
+}
 
 
 class Sex(models.TextChoices):

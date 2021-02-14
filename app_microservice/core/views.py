@@ -12,8 +12,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .bucket import download_image, upload_image, delete_image
-from .choices import Breed, Species
-from .models import Favorite, Media, Offer, Subscription, User
+from .choices import BREEDS_FOR_SPECIES, Species
+from .models import Favorite, OfferImage, Offer, Subscription, User
 from .permissions import (
     FavoritePermission, OfferPermission, ServiceAccountTokenReadOnly,
     UserPermission
@@ -97,29 +97,27 @@ class UserViewSet(
         image_name = request.data['name']
         stored_image_name = f"{user_uuid}{image_name}"
         
-        user = WSUser.objects.filter(
-            uuid=self.get_object().uuid
-        )
+        user = self.get_object()
 
         if user.profile_image_name:
             delete_image(user.profile_image_name)
 
-        user.update(profileImageName=stored_image_name)
+        user.profile_image_name=stored_image_name
+        user.save()
         upload_image(stored_image_name, request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['DELETE'])
     def delete_profile_image(self, request, *args, **kwargs):
-        user = WSUser.objects.filter(
-            uuid=self.get_object().uuid
-        )
+        user = self.get_object()
 
         if not user.profile_image_name:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         delete_image(user.profile_image_name)
-        user.update(profileImageName='')
+        user.profile_image_name=''
+        user.save()
         return Response(status=status.HTTP_200_OK)
 
     # Subscriptions
@@ -143,9 +141,10 @@ class UserViewSet(
 
         return Response(status=status.HTTP_201_CREATED)
 
+    
     @action(detail=True, methods=['DELETE'])
     def delete_subscription(self, request, *args, **kwargs):
-        subscription = Subscriptions.objects.filter(
+        subscription = Subscription.objects.filter(
             user=self.get_object(), breed=request.data['breed']
         )
 
@@ -155,7 +154,6 @@ class UserViewSet(
         subscription.delete()
 
         return Response(status=status.HTTP_200_OK)
-
 
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
@@ -168,8 +166,8 @@ class OfferViewSet(viewsets.ModelViewSet):
     def get_images(self, request, *args, **kwargs):
         images = []
 
-        for medium in Media.objects.filter(offer=self.get_object()):
-            images.append(download_image(medium.image))
+        for image in OfferImage.objects.filter(offer=self.get_object()):
+            images.append(download_image(image.name))
 
         return Response(images, status=status.HTTP_200_OK)
 
@@ -180,11 +178,11 @@ class OfferViewSet(viewsets.ModelViewSet):
         stored_image_name = f"{offer_uuid}{image_name}"
 
         try:
-            Media.objects.create(
-                offer=self.get_object(), image=stored_image_name
+            OfferImage.objects.create(
+                offer=self.get_object(), name=stored_image_name
             )
         except IntegrityError:
-            # medium already exists
+            # offer_image already exists
             return Response(status=status.HTTP_409_CONFLICT)
 
         upload_image(stored_image_name, request.data['image'])
@@ -197,14 +195,14 @@ class OfferViewSet(viewsets.ModelViewSet):
         image_name = request.data['name']
         stored_image_name = f"{offer_uuid}{image_name}"
 
-        medium = Media.objects.filter(
-            offer=self.get_object(), image=stored_image_name
+        offer_image = OfferImage.objects.filter(
+            offer=self.get_object(), name=stored_image_name
         )
 
-        if not medium.exists():
+        if not offer_image.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        medium.delete()
+        offer_image.delete()
         delete_image(stored_image_name)
 
         return Response(status=status.HTTP_200_OK)
@@ -240,29 +238,17 @@ class BreedView(APIView):
 
 
 class SpeciesView(APIView):
-    permission_classes = [ServiceAccountTokenReadOnly]
+    authentication_classes = []
+    permission_classes = []
 
     def get(self, request, format=None):
         species = request.query_params['species']
         result = []
 
-        if species == 'dog':
-            result.append(Breed.JACK_RUSSEL)
-
-        if species == 'cat':
-            result.append(Breed.PERSIAN)
-
-        if species == 'shark':
-            result.append(Breed.WHITE_SHARK)
-
-        if species == 'dinosaur':
-            result.append(Breed.KAWUK)
-
         if species == 'all':
-            result.append(Species.DOG)
-            result.append(Species.CAT)
-            result.append(Species.SHARK)
-            result.append(Species.DINOSAUR)
+            result = Species.values
+        else:
+            result = BREEDS_FOR_SPECIES[species]
 
         if not result:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -316,17 +302,17 @@ class GoogleIdTokenLoginView(APIView):
             raise exceptions.NotAuthenticated()
 
         try:
-            google_id = id_token.verify_oauth2_token(
-                google_id_token,
-                requests.Request(),
-                settings.GOOGLE_OAUTH_AUDIENCE,
-            )
+            #google_id = id_token.verify_oauth2_token(
+            #    google_id_token,
+            #    requests.Request(),
+            #    settings.GOOGLE_OAUTH_AUDIENCE,
+            #)
 
-            # google_id = {
-            #     "sub": "3ef9c7a3-1333-44b2-b1ed-40eefa96ccdb",
-            #     "name": "nik sauer",
-            #     "email": "nik.sauer@mes.com"
-            # }
+            google_id = {
+                "sub": "3ef9c7a3-1333-44b2-b1ed-40eefa96ccdb",
+                "name": "nik sauer",
+                "email": "nik.sauer@mes.com"
+            }
         except:  # noqa
             raise exceptions.NotAuthenticated()
 
