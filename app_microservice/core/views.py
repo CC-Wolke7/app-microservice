@@ -19,8 +19,9 @@ from .permissions import (
     UserPermission
 )
 from .serializers import (
-    AuthTokenSerializer, FavoriteSerializer, OfferSerializer,
-    SubscriptionSerializer, UserSerializer
+    AuthTokenSerializer, CreateFavoriteSerializer, FavoriteSerializer,
+    OfferSerializer, SubscribeSerializer, SubscriptionSerializer,
+    UploadImageSerializer, UserSerializer
 )
 
 
@@ -33,6 +34,18 @@ class UserViewSet(
     serializer_class = UserSerializer
     permission_classes = [UserPermission]
     lookup_field = 'uuid'
+
+    def get_serializer_class(self):
+        if self.action in ["favorite", "delete_favorite"]:
+            return CreateFavoriteSerializer
+
+        if self.action == "upload_profile_image":
+            return UploadImageSerializer
+
+        if self.action == "subscription":
+            return SubscribeSerializer
+
+        return self.serializer_class
 
     # Offers
     @action(detail=True)
@@ -53,6 +66,9 @@ class UserViewSet(
 
     @action(detail=True, methods=['POST'])
     def favorite(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         try:
             offer = Offer.objects.get(uuid=request.data['offer'])
         except Offer.DoesNotExist:
@@ -68,6 +84,9 @@ class UserViewSet(
 
     @action(detail=True, methods=['DELETE'])
     def delete_favorite(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         try:
             favorite = Favorite.objects.get(
                 user=self.get_object(), offer__uuid=request.data['offer']
@@ -93,6 +112,9 @@ class UserViewSet(
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         user = self.get_object()
 
         image = request.data['image']
@@ -132,6 +154,9 @@ class UserViewSet(
 
     @action(detail=True, methods=['POST'])
     def subscription(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         try:
             Subscription.objects.create(
                 user=self.get_object(), breed=request.data['breed']
@@ -162,6 +187,12 @@ class OfferViewSet(viewsets.ModelViewSet):
     permission_classes = [OfferPermission]
     lookup_field = 'uuid'
 
+    def get_serializer_class(self):
+        if self.action == "upload_image":
+            return UploadImageSerializer
+
+        return self.serializer_class
+
     # Images
     @action(detail=True)
     def get_images(self, request, *args, **kwargs):
@@ -174,13 +205,16 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'])
     def upload_image(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         offer = self.get_object()
         offer_uuid = str(offer.uuid)
 
         image = request.data['image']
 
         image_name = request.data['name']
-        stored_image_name = f"{offer_uuid}{image_name}"
+        stored_image_name = f"{offer_uuid}_offer_image_{image_name}"
 
         upload_image(stored_image_name, image)
 
