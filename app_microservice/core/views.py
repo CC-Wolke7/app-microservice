@@ -49,14 +49,11 @@ class UserViewSet(
     # Favorites
     @action(detail=True)
     def get_favorites(self, request, *args, **kwargs):
-        favorites = Favorite.objects.filter(user=self.get_object())
+        offer_uuids = Favorite.objects.filter(
+            user=self.get_object()
+        ).values_list("offer__uuid", flat=True)
 
-        result = []
-
-        for favorite in favorites:
-            result.append(favorite.offer.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(offer_uuids, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def favorite(self, request, *args, **kwargs):
