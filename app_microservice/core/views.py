@@ -82,23 +82,25 @@ class UserViewSet(
     # Profile Image
     @action(detail=True)
     def get_profile_image(self, request, *args, **kwargs):
-        image = download_image(self.get_object().profile_image_name)
+        user = self.get_object()
+
+        if not user.profile_image_name:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        image = download_image(user.profile_image_name)
 
         return Response(image, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
         user = self.get_object()
-        user_uuid = str(user.uuid)
 
         image = request.data['image']
+        profile_image_name = f"{str(user.uuid)}_profile_image"
 
-        image_name = request.data['name']
-        stored_image_name = f"{user_uuid}{image_name}"
+        upload_image(profile_image_name, image)
 
-        upload_image(stored_image_name, image)
-
-        user.profile_image_name = stored_image_name
+        user.profile_image_name = profile_image_name
         user.save()
 
         return Response(status=status.HTTP_201_CREATED)

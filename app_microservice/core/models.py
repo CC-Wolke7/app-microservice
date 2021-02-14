@@ -15,7 +15,7 @@ class User(PermissionsMixin, AbstractBaseUser):
     external_id = models.CharField(max_length=255)
     signup_method = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    profile_image_name = models.CharField(max_length=255)
+    profile_image_name = models.CharField(max_length=255, null=True)
 
     objects = UserManager()
 
