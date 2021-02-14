@@ -10,6 +10,8 @@ class Species(models.TextChoices):
     CAT = 'Cat'
     SHARK = 'Shark'
     DINOSAUR = 'Dinosaur'
+    BIRD = "Bird"
+    SPIDER = "Spider"
 
 
 class Breed(models.TextChoices):
@@ -17,6 +19,14 @@ class Breed(models.TextChoices):
     PERSIAN = 'Persian'
     WHITE_SHARK = 'White Shark'
     KAWUK = 'Kawuk'
+    CHICKEN = "Chicken"
+    LION = "Lion"
+    BLACK_WIDOW = "Black Widow"
+    OWL = "Owl"
+    DOMESTIC_CAT = "Domestic Cat"
+    WOLF = "Wolf"
+    MALTESER = "Malteser"
+    ENGLISH_COCKER_SPANIEL = "English Cocker Spaniel"
 
 
 BREEDS_FOR_SPECIES = {

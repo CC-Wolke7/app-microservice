@@ -21,6 +21,8 @@ class User(PermissionsMixin, AbstractBaseUser):
         max_length=255, blank=True, null=True
     )
 
+    demo_id = models.IntegerField(unique=True, null=True)
+
     objects = UserManager()
 
     # These attributes are required for the Django auth builtins
@@ -43,6 +45,8 @@ class Offer(models.Model):
     date_published = models.DateField(auto_now=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     published_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    demo_id = models.IntegerField(unique=True, null=True)
 
     class Meta:
         ordering = ['date_published']
