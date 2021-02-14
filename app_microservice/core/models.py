@@ -34,7 +34,7 @@ class Offer(models.Model):
     sterile = models.BooleanField()
     description = models.CharField(max_length=255)
     date_published = models.DateField()
-    place = models.CharField(max_length=255)
+    location = models.CharField(max_length=255, null=True)
     published_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:

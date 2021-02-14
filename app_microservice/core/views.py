@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .bucket import download_image, upload_image
-from .choices import Breed, Species
+from .choices import BREEDS_FOR_SPECIES, Species
 from .models import Favorite, Media, Offer, Subscription, User
 from .permissions import (
     FavoritePermission, OfferPermission, ServiceAccountTokenReadOnly,
@@ -181,42 +181,25 @@ class BreedView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
-        subscriptions = Subscription.objects.filter(
+        user_uuids = Subscription.objects.filter(
             breed=request.query_params['breed']
-        )
+        ).values_list("user__uuid", flat=True)
 
-        result = []
-
-        for subscription in subscriptions:
-            result.append(subscription.user.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(user_uuids, status=status.HTTP_200_OK)
 
 
 class SpeciesView(APIView):
-    permission_classes = [ServiceAccountTokenReadOnly]
+    authentication_classes = []
+    permission_classes = []
 
     def get(self, request, format=None):
         species = request.query_params['species']
         result = []
 
-        if species == 'dog':
-            result.append(Breed.JACK_RUSSEL)
-
-        if species == 'cat':
-            result.append(Breed.PERSIAN)
-
-        if species == 'shark':
-            result.append(Breed.WHITE_SHARK)
-
-        if species == 'dinosaur':
-            result.append(Breed.KAWUK)
-
         if species == 'all':
-            result.append(Species.DOG)
-            result.append(Species.CAT)
-            result.append(Species.SHARK)
-            result.append(Species.DINOSAUR)
+            result = Species.values
+        else:
+            result = BREEDS_FOR_SPECIES[species]
 
         if not result:
             return Response(status=status.HTTP_404_NOT_FOUND)

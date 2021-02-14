@@ -1,11 +1,11 @@
 from google.cloud import pubsub_v1
 
-# from django.conf import settings
-
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Favorite, Offer, Subscription, User
+
+# from django.conf import settings
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,8 +23,9 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         recommend_data = '{"breed": "golden_retriever"}'
         publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(
-            #settings.PROJECT_ID, settings.TOPIC_ID
-            "wolke-sieben-fs", "newOffer"
+            # settings.PROJECT_ID, settings.TOPIC_ID
+            "wolke-sieben-fs",
+            "newOffer"
         )
         recommend_data = recommend_data.encode("utf-8")
         publisher.publish(topic_path, recommend_data)
@@ -36,7 +37,7 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         model = Offer
         fields = [
             'url', 'uuid', 'name', 'age', 'species', 'breed', 'sterile',
-            'description', 'date_published', 'published_by', 'sex'
+            'description', 'date_published', 'published_by', 'sex', 'location'
         ]
         extra_kwargs = {
             'url': {
