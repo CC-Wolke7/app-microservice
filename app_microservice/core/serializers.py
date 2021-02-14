@@ -1,9 +1,12 @@
 import json
+
+# from google.auth.credentials import AnonymousCredentials
 from google.cloud import pubsub_v1
-from google.auth.credentials import AnonymousCredentials
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from core.choices import Breed
 
 from .models import Favorite, Offer, Subscription, User
 
@@ -22,10 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, data):
+        recommend_data = json.dumps({"breed": data["breed"], "offerUrl": "test"})
 
-        recommend_data = json.dumps({"breed": data.breed, "offerUrl": "test"})
-
-        publisher = pubsub_v1.PublisherClient(credentials={})
+        # publisher = pubsub_v1.PublisherClient(credentials={})
 
         topic_path = publisher.topic_path(
             # settings.PROJECT_ID, settings.TOPIC_ID
@@ -33,12 +35,12 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
             "newOffer"
         )
         recommend_data = recommend_data.encode("utf-8")
-        future = publisher.publish(topic_path, recommend_data)
-        print(future.result())
+        # future = publisher.publish(topic_path, recommend_data)
+        # print(future.result())
 
         print(f"Published messages to {topic_path}.")
-        return super().create(data)
 
+        return super().create(data)
 
     class Meta:
         model = Offer
@@ -71,11 +73,30 @@ class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
+class CreateFavoriteSerializer(serializers.Serializer):
+    offer = serializers.SlugRelatedField(
+        slug_field='uuid', queryset=Offer.objects.all()
+    )
+
+
+class UploadImageSerializer(serializers.Serializer):
+    image = serializers.CharField()
+
+
+class SubscribeSerializer(serializers.Serializer):
+    breed = serializers.ChoiceField(Breed.choices)
+
+
 class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Subscription
         fields = ['url', 'user', 'breed']
         extra_kwargs = {'user': {'lookup_field': 'uuid'}}
+
+
+class UploadOfferImageSerializer(serializers.Serializer):
+    image = serializers.CharField()
+    name = serializers.CharField(max_length=255)
 
 
 class AuthTokenSerializer(TokenObtainPairSerializer):

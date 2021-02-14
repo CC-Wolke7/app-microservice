@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "name": "Hanna Hundeverkäufer",
+        "email": "hannah@dogslove.com"
+    },
+    {
+        "id": 2,
+        "name": "Hans Haimann",
+        "email": "hans@underwateranimals.com"
+    },
+    {
+        "id": 3,
+        "name": "Hans Hundi",
+        "email": "hans@freilandhunde.de"
+    },
+    {
+        "id": 4,
+        "name": "Someone Someone",
+        "email": "noreply@any.com"
+    }
+]
