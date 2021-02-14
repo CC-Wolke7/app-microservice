@@ -13,7 +13,7 @@ from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .bucket import download_image, upload_image
 from .choices import BREEDS_FOR_SPECIES, Species
-from .models import Favorite, Media, Offer, Subscription, User
+from .models import Favorite, Offer, OfferImage, Subscription, User
 from .permissions import (
     FavoritePermission, OfferPermission, ServiceAccountTokenReadOnly,
     UserPermission
@@ -137,8 +137,8 @@ class OfferViewSet(viewsets.ModelViewSet):
     def get_images(self, request, *args, **kwargs):
         images = []
 
-        for medium in Media.objects.filter(offer=self.get_object()):
-            images.append(download_image(medium.image))
+        for image in OfferImage.objects.filter(offer=self.get_object()):
+            images.append(download_image(image.name))
 
         return Response(images, status=status.HTTP_200_OK)
 
@@ -154,7 +154,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 
         upload_image(stored_image_name, image)
 
-        Media.objects.create(offer, image=stored_image_name)
+        OfferImage.objects.create(offer, image=stored_image_name)
 
         return Response(status=status.HTTP_201_CREATED)
 

@@ -1,6 +1,10 @@
 from django.db import models
 
 
+class SocialLogin(models.TextChoices):
+    Google = "google"
+
+
 class Species(models.TextChoices):
     DOG = 'Dog'
     CAT = 'Cat'
