@@ -1,6 +1,5 @@
 from google.cloud import pubsub_v1
 
-from django.conf import settings
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -19,18 +18,18 @@ class WSUserSerializer(serializers.ModelSerializer):
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, data):
-        super(OfferSerializer, self).create(data)
-
         print(data)
-        recommend_data = '{"breed": "schaeferhund"}'
+        recommend_data = '{"breed": "golden_retriever"}'
         publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(
-            settings.PROJECT_ID, settings.TOPIC_ID
+            #settings.PROJECT_ID, settings.TOPIC_ID
+            "wolke-sieben-fs", "newOffer"
         )
         recommend_data = recommend_data.encode("utf-8")
         publisher.publish(topic_path, recommend_data)
 
         print(f"Published messages to {topic_path}.")
+        return super(OfferSerializer, self).create(data)
 
     class Meta:
         model = Offer
