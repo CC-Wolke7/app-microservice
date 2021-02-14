@@ -25,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, data):
-
+        """
         recommend_data = json.dumps({"breed": data.breed, "offerUrl": "test"})
 
         publisher = pubsub_v1.PublisherClient(credentials={})
@@ -40,6 +40,7 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         print(future.result())
 
         print(f"Published messages to {topic_path}.")
+        """
         return super().create(data)
 
     class Meta:
