@@ -51,7 +51,10 @@ class Offer(models.Model):
 
 class OfferImage(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ["offer", "name"]
 
 
 class Favorite(models.Model):
