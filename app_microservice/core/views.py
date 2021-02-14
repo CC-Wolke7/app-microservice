@@ -181,16 +181,11 @@ class BreedView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
-        subscriptions = Subscription.objects.filter(
+        user_uuids = Subscription.objects.filter(
             breed=request.query_params['breed']
-        )
+        ).values_list("user__uuid", flat=True)
 
-        result = []
-
-        for subscription in subscriptions:
-            result.append(subscription.user.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(user_uuids, status=status.HTTP_200_OK)
 
 
 class SpeciesView(APIView):
