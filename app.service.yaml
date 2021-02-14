@@ -21,8 +21,8 @@ spec:
           ports:
             - containerPort: 8000
           env:
-            # - name: DJANGO_SUPERUSER_PASSWORD
-            #   value: "root"
+            - name: DJANGO_ENVIRONMENT
+              value: "production"
             - name: DJANGO_SECRET_KEY
               value: "OGFhMjM1M2U0MzM5ZTNkMTI5NTgwMTViOTE3ODkyNjc5NWViZjUwMTUzYWNhMTU0Cg=="
             - name: DJANGO_DATABASE_NAME
@@ -39,6 +39,8 @@ spec:
               value: "https://cc-wolkesieben.de"
             - name: GCP_PROJECT_ID
               value: "wolke-sieben-fs"
+            - name: GCP_BUCKET
+              value: "app-media-bucket"
             - name: GOOGLE_OAUTH_AUDIENCE
               value: "481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com"
             - name: RECOMMENDER_BOT_TOKEN

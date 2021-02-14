@@ -1,7 +1,7 @@
 from django.contrib.auth.models import BaseUserManager
 
 
-class WSUserManager(BaseUserManager):
+class UserManager(BaseUserManager):
     """ Database manager for user accounts. """
     def create_user(self, email, password=None, **extra_fields):
         """ Create and save a user with the given email address. """

@@ -1,18 +1,18 @@
 #from google.cloud import pubsub_v1
 
-from django.conf import settings
-
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import Favorites, Offer, Subscriptions, WSUser
+from .models import Favorite, Offer, Subscription, User
+
+# from django.conf import settings
 
 
-class WSUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WSUser
+        model = User
         fields = [
-            'url', 'uuid', 'name', 'email', 'is_staff', 'profileImageName'
+            'url', 'uuid', 'name', 'email', 'is_staff', 'profile_image_name'
         ]
         extra_kwargs = {'url': {'lookup_field': 'uuid'}}
 
@@ -20,24 +20,25 @@ class WSUserSerializer(serializers.ModelSerializer):
 class OfferSerializer(serializers.HyperlinkedModelSerializer):
     """
     def create(self, data):
-        super(OfferSerializer, self).create(data)
-
         print(data)
-        recommend_data = '{"breed": "schaeferhund"}'
+        recommend_data = '{"breed": "golden_retriever"}'
         publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(
-            settings.PROJECT_ID, settings.TOPIC_ID
+            # settings.PROJECT_ID, settings.TOPIC_ID
+            "wolke-sieben-fs",
+            "newOffer"
         )
         recommend_data = recommend_data.encode("utf-8")
         publisher.publish(topic_path, recommend_data)
 
         print(f"Published messages to {topic_path}.")
+        return super(OfferSerializer, self).create(data)
     """
     class Meta:
         model = Offer
         fields = [
             'url', 'uuid', 'name', 'age', 'species', 'breed', 'sterile',
-            'description', 'date_published', 'published_by', 'sex'
+            'description', 'date_published', 'published_by', 'sex', 'location'
         ]
         extra_kwargs = {
             'url': {
@@ -49,9 +50,9 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
-class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
+class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Favorites
+        model = Favorite
         fields = ['url', 'user', 'offer']
         extra_kwargs = {
             'user': {
@@ -63,9 +64,9 @@ class FavoritesSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
-class SubscriptionsSerializer(serializers.HyperlinkedModelSerializer):
+class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Subscriptions
+        model = Subscription
         fields = ['url', 'user', 'breed']
         extra_kwargs = {'user': {'lookup_field': 'uuid'}}
 

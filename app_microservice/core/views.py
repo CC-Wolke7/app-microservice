@@ -1,8 +1,8 @@
 from google.auth.transport import requests
-from google.cloud import storage
 from google.oauth2 import id_token
 
 from django.conf import settings
+from django.db import IntegrityError
 from django.utils.encoding import smart_text
 
 from rest_framework import exceptions, mixins, permissions, status, viewsets
@@ -11,148 +11,148 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
-from .models import Favorites, Media, Offer, Subscriptions, WSUser
-from .choices import Species, Breed
-from .permissions import (  # noqa
-    FavoritesPermission, OfferPermission, ServiceAccountTokenReadOnly,
-    WSUserPermission
+from .bucket import download_image, upload_image, delete_image
+from .choices import Breed, Species
+from .models import Favorite, Media, Offer, Subscription, User
+from .permissions import (
+    FavoritePermission, OfferPermission, ServiceAccountTokenReadOnly,
+    UserPermission
 )
 from .serializers import (
-    AuthTokenSerializer, FavoritesSerializer, OfferSerializer,
-    SubscriptionsSerializer, WSUserSerializer
+    AuthTokenSerializer, FavoriteSerializer, OfferSerializer,
+    SubscriptionSerializer, UserSerializer
 )
 
-
-def download_image(name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket('wolkesiebenbucket')
-    blob = bucket.blob(name)
-    image = blob.download_as_text()
-
-    return image
-
-
-def upload_image(name, image):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket('wolkesiebenbucket')
-    blob = bucket.blob(name)
-    blob.upload_from_string(image)
-
-
-def delete_image(name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket('wolkesiebenbucket')
-    blob = bucket.blob(name)
-    blob.delete()
-
-
 # TODO: Remove ListModelMixin
-class WSUserViewSet(
+class UserViewSet(
     mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = WSUser.objects.all()
-    serializer_class = WSUserSerializer
-    permission_classes = [WSUserPermission]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [UserPermission]
     lookup_field = 'uuid'
 
     # Offers
     @action(detail=True)
     def get_offers(self, request, *args, **kwargs):
-        offers = Offer.objects.filter(published_by=self.get_object())
+        offer_uuids = Offer.objects.filter(
+            published_by=self.get_object()
+        ).values_list("uuid", flat=True)
 
-        result = []
-
-        for offer in offers:
-            result.append(offer.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(offer_uuids, status=status.HTTP_200_OK)
 
     # Favorites
     @action(detail=True)
     def get_favorites(self, request, *args, **kwargs):
-        favorites = Favorites.objects.filter(user=self.get_object())
+        offer_uuids = Favorite.objects.filter(
+            user=self.get_object()
+        ).values_list("offer__uuid", flat=True)
 
-        result = []
-
-        for favorite in favorites:
-            result.append(favorite.offer.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(offer_uuids, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def favorite(self, request, *args, **kwargs):
-        Favorites.objects.create(
-            user=self.get_object(),
-            offer=Offer.objects.get(uuid=request.data['offer'])
-        )
+        try:
+            offer = Offer.objects.get(uuid=request.data['offer'])
+        except Offer.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            Favorite.objects.create(user=self.get_object(), offer=offer)
+        except IntegrityError:
+            # favorite already exists
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['DELETE'])
     def delete_favorite(self, request, *args, **kwargs):
-        Favorites.objects.get(
-            user=self.get_object(),
-            offer=Offer.objects.get(uuid=request.data['offer'])
-        ).delete()
+        favorite = Favorite.objects.filter(
+            user=self.get_object(), offer__uuid=request.data['offer']
+        )
+
+        if not favorite.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        favorite.delete()
 
         return Response(status=status.HTTP_200_OK)
 
     # Profile Image
     @action(detail=True)
     def get_profile_image(self, request, *args, **kwargs):
-        result = download_image(self.get_object().profileImageName)
+        user = self.get_object()
 
-        return Response(result, status=status.HTTP_200_OK)
+        if not user.profile_image_name:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        image = download_image(user.profile_image_name)
+
+        return Response(image, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'])
     def upload_profile_image(self, request, *args, **kwargs):
         user_uuid = str(self.get_object().uuid)
         image_name = request.data['name']
+        stored_image_name = f"{user_uuid}{image_name}"
         
-        WSUser.objects.filter(uuid=self.get_object().uuid).update(profileImageName=f"{user_uuid}_{image_name}")
+        user = WSUser.objects.filter(
+            uuid=self.get_object().uuid
+        )
 
-        upload_image(f"{user_uuid}_{image_name}", request.data['image'])
+        if user.profile_image_name:
+            delete_image(user.profile_image_name)
+
+        user.update(profileImageName=stored_image_name)
+        upload_image(stored_image_name, request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['DELETE'])
     def delete_profile_image(self, request, *args, **kwargs):
-        user_uuid = str(self.get_object().uuid)
-        image_name = self.get_object().profileImageName
+        user = WSUser.objects.filter(
+            uuid=self.get_object().uuid
+        )
 
-        delete_iamge(f"{user_uuid}_{image_name}")
+        if not user.profile_image_name:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        WSUser.objects.filter(uuid=self.get_object().uuid
-                              ).update(profileImageName='')
-        
+        delete_image(user.profile_image_name)
+        user.update(profileImageName='')
         return Response(status=status.HTTP_200_OK)
 
     # Subscriptions
     @action(detail=True)
     def get_subscriptions(self, request, *args, **kwargs):
-        subscriptions = Subscriptions.objects.filter(user=self.get_object())
+        breeds = Subscription.objects.filter(
+            user=self.get_object()
+        ).values_list("breed", flat=True)
 
-        result = []
-
-        for subscription in subscriptions:
-            result.append(subscription.breed)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(breeds, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def subscription(self, request, *args, **kwargs):
-        Subscriptions.objects.create(
-            user=self.get_object(), breed=request.data['breed']
-        )
+        try:
+            Subscription.objects.create(
+                user=self.get_object(), breed=request.data['breed']
+            )
+        except IntegrityError:
+            # subscription already exists
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['DELETE'])
     def delete_subscription(self, request, *args, **kwargs):
-        Subscriptions.objects.get(
+        subscription = Subscriptions.objects.filter(
             user=self.get_object(), breed=request.data['breed']
-        ).delete()
+        )
+
+        if not subscription.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        subscription.delete()
 
         return Response(status=status.HTTP_200_OK)
 
@@ -166,71 +166,78 @@ class OfferViewSet(viewsets.ModelViewSet):
     # Images
     @action(detail=True)
     def get_images(self, request, *args, **kwargs):
-        result = []
+        images = []
 
         for medium in Media.objects.filter(offer=self.get_object()):
-            result.append(download_image(medium.image))
+            images.append(download_image(medium.image))
 
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(images, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def upload_image(self, request, *args, **kwargs):
         offer_uuid = str(self.get_object().uuid)
         image_name = request.data['name']
+        stored_image_name = f"{offer_uuid}{image_name}"
 
-        upload_image(f"{offer_uuid}_{image_name}", request.data['image'])
+        try:
+            Media.objects.create(
+                offer=self.get_object(), image=stored_image_name
+            )
+        except IntegrityError:
+            # medium already exists
+            return Response(status=status.HTTP_409_CONFLICT)
 
-        Media.objects.create(
-            offer=self.get_object(), image=f"{offer_uuid}_{image_name}"
-        )
+        upload_image(stored_image_name, request.data['image'])
 
         return Response(status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['DELETE'])
     def delete_image(self, request, *args, **kwargs):
-        Media.objects.get(
-            offer=self.get_object(), image=request.data['name']
-        ).delete()
-
         offer_uuid = str(self.get_object().uuid)
         image_name = request.data['name']
+        stored_image_name = f"{offer_uuid}{image_name}"
 
-        delete_image(f"{offer_uuid}_{image_name}")
+        medium = Media.objects.filter(
+            offer=self.get_object(), image=stored_image_name
+        )
+
+        if not medium.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        medium.delete()
+        delete_image(stored_image_name)
 
         return Response(status=status.HTTP_200_OK)
 
 
-class FavoritesViewSet(
+class FavoriteViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Favorites.objects.all()
-    serializer_class = FavoritesSerializer
-    permission_classes = [FavoritesPermission]
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+    permission_classes = [FavoritePermission]
 
 
-class SubscriptionsViewSet(
+class SubscriptionViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Subscriptions.objects.all()
-    serializer_class = SubscriptionsSerializer
-    permission_classes = [FavoritesPermission]
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    permission_classes = [FavoritePermission]
 
 
-class BreedsView(APIView):
+class BreedView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
-        subscribtion = request.query_params['breed']
-        subscribers = Subscriptions.objects.filter(breed=subscribtion)
+        user_uuids = Subscription.objects.filter(
+            breed=request.query_params['breed']
+        ).values_list("user__uuid", flat=True)
 
-        result = []
+        return Response(user_uuids, status=status.HTTP_200_OK)
 
-        for subscriber in subscribers:
-            result.append(subscriber.user.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
 
 class SpeciesView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
@@ -238,13 +245,13 @@ class SpeciesView(APIView):
     def get(self, request, format=None):
         species = request.query_params['species']
         result = []
-        
+
         if species == 'dog':
             result.append(Breed.JACK_RUSSEL)
 
         if species == 'cat':
             result.append(Breed.PERSIAN)
-        
+
         if species == 'shark':
             result.append(Breed.WHITE_SHARK)
 
@@ -316,9 +323,9 @@ class GoogleIdTokenLoginView(APIView):
             )
 
             # google_id = {
-            #     "sub": "123",
+            #     "sub": "3ef9c7a3-1333-44b2-b1ed-40eefa96ccdb",
             #     "name": "nik sauer",
-            #     "email": "nik.sauer@me.com"
+            #     "email": "nik.sauer@mes.com"
             # }
         except:  # noqa
             raise exceptions.NotAuthenticated()
@@ -326,10 +333,10 @@ class GoogleIdTokenLoginView(APIView):
         user_id = google_id["sub"]
 
         try:
-            user = WSUser.objects.all().get(
-                externalId=user_id, signUpMethod='google'
+            user = User.objects.all().get(
+                external_id=user_id, signup_method='google'
             )
-        except WSUser.DoesNotExist:
+        except User.DoesNotExist:
             name = google_id.get("name")
             email = google_id.get("email")
 
@@ -339,11 +346,11 @@ class GoogleIdTokenLoginView(APIView):
                     detail='Name and email are required Google ID claims.'
                 )
 
-            user = WSUser.objects.create(
+            user = User.objects.create(
                 name=name,
                 email=email,
-                externalId=user_id,
-                signUpMethod='google'
+                external_id=user_id,
+                signup_method='google'
             )
 
         token_refresh = AuthTokenSerializer.get_token(user)
