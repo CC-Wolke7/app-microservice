@@ -17,7 +17,9 @@ class User(PermissionsMixin, AbstractBaseUser):
         max_length=10, db_index=True, choices=SocialLogin.choices
     )
     description = models.CharField(max_length=255, blank=True, null=True)
-    profile_image_name = models.CharField(max_length=255, null=True)
+    profile_image_name = models.CharField(
+        max_length=255, blank=True, null=True
+    )
 
     objects = UserManager()
 
@@ -39,7 +41,7 @@ class Offer(models.Model):
     sterile = models.BooleanField()
     description = models.CharField(max_length=255)
     date_published = models.DateField(auto_now=True)
-    location = models.CharField(max_length=255, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
     published_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
