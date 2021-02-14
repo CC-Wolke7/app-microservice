@@ -1,6 +1,7 @@
 import json
+
+# from google.auth.credentials import AnonymousCredentials
 from google.cloud import pubsub_v1
-from google.auth.credentials import AnonymousCredentials
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -40,7 +41,6 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
 
         print(f"Published messages to {topic_path}.")
         return super().create(data)
-
 
     class Meta:
         model = Offer
