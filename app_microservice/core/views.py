@@ -108,20 +108,20 @@ class UserViewSet(
     # Subscriptions
     @action(detail=True)
     def get_subscriptions(self, request, *args, **kwargs):
-        subscriptions = Subscription.objects.filter(user=self.get_object())
+        breeds = Subscription.objects.filter(user=self.get_object()
+                                             ).values_list("breed", flat=True)
 
-        result = []
-
-        for subscription in subscriptions:
-            result.append(subscription.breed)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(breeds, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def subscription(self, request, *args, **kwargs):
-        Subscription.objects.create(
-            user=self.get_object(), breed=request.data['breed']
-        )
+        try:
+            Subscription.objects.create(
+                user=self.get_object(), breed=request.data['breed']
+            )
+        except IntegrityError:
+            # subscription already exists
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 

@@ -60,3 +60,6 @@ class Media(models.Model):
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     breed = models.CharField(max_length=255, choices=Breed.choices)
+
+    class Meta:
+        unique_together = ["user", "breed"]
