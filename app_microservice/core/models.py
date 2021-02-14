@@ -48,6 +48,9 @@ class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ["user", "offer"]
+
 
 class Media(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
