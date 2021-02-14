@@ -66,6 +66,19 @@ class UserViewSet(
 
         return Response(status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['POST'])
+    def unfavorite(self, request, *args, **kwargs):
+        favorite = Favorite.objects.filter(
+            user=self.get_object(), offer__uuid=request.data['offer']
+        )
+
+        if not favorite.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        favorite.delete()
+
+        return Response(status=status.HTTP_200_OK)
+
     # Profile Image
     @action(detail=True)
     def get_profile_image(self, request, *args, **kwargs):
