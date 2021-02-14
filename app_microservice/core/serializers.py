@@ -16,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'url', 'uuid', 'name', 'email', 'is_staff', 'profile_image_name'
         ]
+        read_only_fields = ['uuid', "is_staff", "profile_image_name"]
         extra_kwargs = {'url': {'lookup_field': 'uuid'}}
 
 
@@ -42,9 +43,10 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Offer
         fields = [
-            'url', 'uuid', 'name', 'age', 'species', 'breed', 'sterile',
-            'description', 'date_published', 'published_by', 'sex', 'location'
+            'url', 'uuid', 'name', 'age', 'species', 'breed', 'sex', 'sterile',
+            'description', 'date_published', 'location', 'published_by'
         ]
+        read_only_fields = ['uuid', "date_published"]
         extra_kwargs = {
             'url': {
                 'lookup_field': 'uuid'
