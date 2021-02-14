@@ -37,14 +37,10 @@ class UserViewSet(
     # Offers
     @action(detail=True)
     def get_offers(self, request, *args, **kwargs):
-        offers = Offer.objects.filter(published_by=self.get_object())
+        offer_uuids = Offer.objects.filter(published_by=self.get_object()
+                                           ).values_list("uuid", flat=True)
 
-        result = []
-
-        for offer in offers:
-            result.append(offer.uuid)
-
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(offer_uuids, status=status.HTTP_200_OK)
 
     # Favorites
     @action(detail=True)
