@@ -5,6 +5,8 @@ from google.auth.credentials import AnonymousCredentials
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from core.choices import Breed
+
 from .models import Favorite, Offer, Subscription, User
 
 # from django.conf import settings
@@ -71,11 +73,30 @@ class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
+class CreateFavoriteSerializer(serializers.Serializer):
+    offer = serializers.SlugRelatedField(
+        slug_field='uuid', queryset=Offer.objects.all()
+    )
+
+
+class UploadImageSerializer(serializers.Serializer):
+    image = serializers.CharField()
+
+
+class SubscribeSerializer(serializers.Serializer):
+    breed = serializers.ChoiceField(Breed.choices)
+
+
 class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Subscription
         fields = ['url', 'user', 'breed']
         extra_kwargs = {'user': {'lookup_field': 'uuid'}}
+
+
+class UploadOfferImageSerializer(serializers.Serializer):
+    image = serializers.CharField()
+    name = serializers.CharField(max_length=255)
 
 
 class AuthTokenSerializer(TokenObtainPairSerializer):
