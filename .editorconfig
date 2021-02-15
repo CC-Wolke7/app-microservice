@@ -17,3 +17,9 @@ indent_size = 2
 
 [*.{yml,yaml}]
 indent_size = 2
+
+[Makefile]
+max_line_length = 0
+trim_trailing_whitespace = true
+indent_style = tab
+indent_size = 4

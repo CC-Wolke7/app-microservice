@@ -22,3 +22,6 @@ push-test-image: test-image
 
 deploy:
 	gcloud beta run services replace app.service.yaml --platform managed --region europe-west3
+
+collectstatic:
+	docker run --rm -e DJANGO_ENVIRONMENT='minimal' -v ${PROJECT_ROOT}/static:/app/app_microservice/app_microservice/static --entrypoint python ${NAME} manage.py collectstatic --no-input

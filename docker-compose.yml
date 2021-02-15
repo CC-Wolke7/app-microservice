@@ -17,10 +17,10 @@ services:
       - db
     environment:
       PYTHONDONTWRITEBYTECODE: "true"
+      DJANGO_ENVIRONMENT: "local"
+      DJANGO_DEBUG: "True"
       DJANGO_SECRET_KEY: "ZjYyMjg0YmE0OTJkNjBhNDIyZDkyOTZkN2ZlZWI2ZmFhNDA0NmJmMDAzNmEwYTU2Cg=="
       DJANGO_ACCESS_TOKEN_LIFETIME: 1440 # 1 day (in minutes)
-      DJANGO_DEBUG: "True"
-      DJANGO_ENVIRONMENT: "local"
       DJANGO_DATABASE_NAME: "app_microservice_dev"
       DJANGO_DATABASE_USER: "root"
       DJANGO_DATABASE_PASSWORD: "devpass"

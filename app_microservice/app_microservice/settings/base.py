@@ -8,18 +8,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from datetime import timedelta
 from pathlib import Path
 
 from .helper import getenv, netloc
-
-# Google Cloud Project
-GCP_PROJECT_ID = getenv('GCP_PROJECT_ID')
-GCP_BUCKET = getenv('GCP_BUCKET')
-
-# Recommender Bot
-RECOMMENDER_BOT_TOPIC = getenv('RECOMMENDER_BOT_TOPIC')
-RECOMMENDER_BOT_TOKEN = getenv('RECOMMENDER_BOT_TOKEN')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # an error. Should be disabled in production.
 DEBUG = getenv('DJANGO_DEBUG', True)
 
-ENVIRONMENT = getenv('DJANGO_ENVIRONMENT')
+ENVIRONMENT = getenv('DJANGO_ENVIRONMENT', 'local')
 
 # Frontend (Ionic) and Backend (Django) URLs
 BACKEND_API_URL = getenv('DJANGO_API_URL', 'http://localhost:8000')
@@ -128,50 +119,9 @@ REST_FRAMEWORK = {
     ],
 }
 
-# JWT
-SECRET_KEY = getenv('DJANGO_SECRET_KEY')
-ACCESS_TOKEN_LIFETIME_MINUTES = int(getenv('DJANGO_ACCESS_TOKEN_LIFETIME', 15))
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
-    'AUTH_HEADER_TYPES': 'Bearer',
-    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'uuid',
-    'USER_ID_CLAIM': 'sub',
-    'AUTH_TOKEN_CLASSES': ['rest_framework_simplejwt.tokens.AccessToken'],
-    'TOKEN_TYPE_CLAIM': 'token_type',
-    'JTI_CLAIM': 'jti',
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-}
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': getenv('DJANGO_DATABASE_NAME'),
-        'USER': getenv('DJANGO_DATABASE_USER'),
-        'PASSWORD': getenv('DJANGO_DATABASE_PASSWORD'),
-        'HOST': getenv('DJANGO_DATABASE_HOST'),
-        'PORT': getenv('DJANGO_DATABASE_PORT', None),
-        'ATOMIC_REQUESTS': True,
-        'CONN_MAX_AGE': 0,
-        'OPTIONS': {
-            'charset': 'utf8mb4'
-        }
-    }
-}
+DATABASES = {}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -192,15 +142,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 AUTH_USER_MODEL = 'core.User'
-
-# Social Auth
-GOOGLE_OAUTH_AUDIENCE = getenv('GOOGLE_OAUTH_AUDIENCE')
-
-# Service Tokens can authenticate for access to certain endpoints. They're
-# long-lived and used for machine-to-machine authorization.
-SERVICE_TOKEN_WHITELIST = [
-    RECOMMENDER_BOT_TOKEN,
-]
 
 # This is used to redirect logins for the API documentation views, which can be
 # accessed with session-based authentication, but require the user be an admin
