@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.utils.encoding import smart_text
 
-from rest_framework import exceptions, mixins, permissions, status, viewsets
+from rest_framework import exceptions, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,24 +17,19 @@ from .bucket import delete_image, download_image, upload_image
 from .choices import BREEDS_FOR_SPECIES, Species
 from .models import Favorite, Offer, OfferImage, Subscription, User
 from .permissions import (
-    FavoritePermission, OfferPermission, ServiceAccountTokenReadOnly,
-    UserPermission
+    OfferCreatorOrAdminModifyAuthenticatedCreate, ServiceAccountTokenReadOnly,
+    UserOrAdminWriteAuthenticatedRead
 )
 from .serializers import (
-    AuthTokenSerializer, CreateFavoriteSerializer, FavoriteSerializer,
-    OfferSerializer, SubscribeSerializer, SubscriptionSerializer,
-    UploadImageSerializer, UserSerializer
+    AuthTokenSerializer, CreateFavoriteSerializer, OfferSerializer,
+    SubscribeSerializer, UploadImageSerializer, UserSerializer
 )
 
 
-# TODO: Remove ListModelMixin
-class UserViewSet(
-    mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [UserPermission]
+    permission_classes = [UserOrAdminWriteAuthenticatedRead]
     lookup_field = 'uuid'
 
     def get_serializer_class(self):
@@ -44,7 +39,7 @@ class UserViewSet(
         if self.action == "upload_profile_image":
             return UploadImageSerializer
 
-        if self.action == "subscription":
+        if self.action in ["subscription", "delete_subscription"]:
             return SubscribeSerializer
 
         return self.serializer_class
@@ -171,6 +166,9 @@ class UserViewSet(
 
     @action(detail=True, methods=['DELETE'])
     def delete_subscription(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         try:
             subscription = Subscription.objects.get(
                 user=self.get_object(), breed=request.data['breed']
@@ -186,7 +184,7 @@ class UserViewSet(
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
-    permission_classes = [OfferPermission]
+    permission_classes = [OfferCreatorOrAdminModifyAuthenticatedCreate]
     lookup_field = 'uuid'
 
     def create(self, request, *args, **kwargs):
@@ -211,7 +209,7 @@ class OfferViewSet(viewsets.ModelViewSet):
 
 
     def get_serializer_class(self):
-        if self.action == "upload_image":
+        if self.action in ["upload_image", "delete_image"]:
             return UploadImageSerializer
 
         return self.serializer_class
@@ -253,11 +251,14 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['DELETE'])
     def delete_image(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         offer = self.get_object()
         offer_uuid = str(offer.uuid)
 
         image_name = request.data['name']
-        stored_image_name = f"{offer_uuid}{image_name}"
+        stored_image_name = f"{offer_uuid}_offer_image_{image_name}"
 
         try:
             offer_image = OfferImage.objects.get(
@@ -267,30 +268,13 @@ class OfferViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         delete_image(stored_image_name)
+
         offer_image.delete()
 
         return Response(status=status.HTTP_200_OK)
 
 
-class FavoriteViewSet(
-    mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    queryset = Favorite.objects.all()
-    serializer_class = FavoriteSerializer
-    permission_classes = [FavoritePermission]
-
-
-class SubscriptionViewSet(
-    mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    queryset = Subscription.objects.all()
-    serializer_class = SubscriptionSerializer
-    permission_classes = [FavoritePermission]
-
-
-class BreedView(APIView):
+class SubscribersView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
@@ -302,8 +286,7 @@ class BreedView(APIView):
 
 
 class SpeciesView(APIView):
-    authentication_classes = []
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
         species = request.query_params['species']

@@ -6,46 +6,51 @@ from rest_framework.permissions import SAFE_METHODS
 from app_microservice import settings
 
 
-class UserPermission(permissions.BasePermission):
+class UserOrAdminWriteAuthenticatedRead(permissions.IsAuthenticated):
     """
-    Custom permission to only allow admins or the user itself to
-    view a user-entry
+    Custom permission to only allow admins,
+    or the user himself, to edit a user.
+
+    Authenticated users may retrieve users and
+    their details but not create new ones.
     """
-    def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests
+    def has_object_permission(self, request, view, user):
+        # Read permissions are granted to any callee, so
+        # we'll always allow GET, HEAD or OPTIONS requests
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return str(obj) == str(request.user) or request.user.is_staff
+        # Write permissions are only allowed to the
+        # owner of the resource or admins
+        return str(user) == str(request.user) or request.user.is_staff
 
 
-class OfferPermission(permissions.BasePermission):
+class OfferCreatorOrAdminModifyAuthenticatedCreate(permissions.BasePermission):
     """
-    Custom permission to only allow creators of an offer
-    or admins to edit it
+    Custom permission to only allow creators of
+    an offer, or admins, to edit the offer.
+
+    Unauthenticated users may retrieve offers and
+    their details but not create new ones.
     """
-    def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests
+    def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return str(obj.published_by
-                   ) == str(request.user) or request.user.is_staff
+        return permissions.IsAuthenticated().has_permission(request, view)
 
+    def has_object_permission(self, request, view, offer):
+        # Read permissions are granted to any callee, so
+        # we'll always allow GET, HEAD or OPTIONS requests
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
-class FavoritePermission(permissions.BasePermission):
-    """
-    Custom permission to only allow admins or the user itself to view
-    a favorite-entry
-    """
-    def has_object_permission(self, request, view, obj):
-
-        # Write permissions are only allowed to the owner of the resource or admins # noqa
-        return str(obj.user) == str(request.user) or request.user.is_staff
+        # Write permissions are only allowed to the
+        # owner of the resource or admins
+        return (
+            str(offer.published_by) == str(request.user)
+            or request.user.is_staff
+        )
 
 
 class ServiceAccountTokenReadOnly(permissions.BasePermission):
