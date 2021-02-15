@@ -1,7 +1,4 @@
-import json
-
 from google.auth.transport import requests
-from google.cloud import pubsub_v1
 from google.oauth2 import id_token
 
 from django.conf import settings
@@ -188,26 +185,6 @@ class OfferViewSet(viewsets.ModelViewSet):
     serializer_class = OfferSerializer
     permission_classes = [OfferCreatorOrAdminModifyAuthenticatedCreate]
     lookup_field = 'uuid'
-
-    def create(self, request, *args, **kwargs):
-        recommend_data = json.dumps({
-            'breed': request.data['breed'],
-            'offerUrl': 'test'
-        })
-
-        publisher = pubsub_v1.PublisherClient()
-
-        topic_path = publisher.topic_path(settings.GCP_PROJECT_ID, 'newOffer')
-        recommend_data = recommend_data.encode('utf-8')
-        try:
-            future = publisher.publish(topic_path, recommend_data)
-            future.result()
-            print(f'Published messages to {topic_path}.')
-
-        except Exception as e:
-            print(e)
-
-        return super().create(request)
 
     def get_serializer_class(self):
         if self.action in ['upload_image', 'delete_image']:
