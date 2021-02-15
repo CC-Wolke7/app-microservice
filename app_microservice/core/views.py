@@ -207,7 +207,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
 
-        return super().create(request.data)
+        return super().create(request)
 
 
     def get_serializer_class(self):
