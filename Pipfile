@@ -15,6 +15,7 @@ mysqlclient = "*"
 djangorestframework-simplejwt = "*"
 google-cloud-storage = "*"
 google-cloud-pubsub = "*"
+django-filter = "*"
 
 [dev-packages]
 flake8 = "~=3.7.0"

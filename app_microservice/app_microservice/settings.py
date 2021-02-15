@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "rest_framework",
     "drf_yasg",
+    "django_filters",
 ]
 
 # The order of some of these middleware matters. For example,
@@ -119,7 +120,12 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication"
-    ]
+    ],
+
+    # Backends to apply queryset filters to DRF requests
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
 }
 
 # JWT
