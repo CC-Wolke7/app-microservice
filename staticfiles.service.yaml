@@ -1,0 +1,14 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: app-api-staticfiles
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/wolke-sieben-fs/app-microservice-staticfiles:3f098cd-dirty-dev # gcr.io/$GCP_PROJECT_ID/$STATICFILES_IMAGE_NAME:$IMAGE_VERSION # gcr.io/wolke-sieben-fs/app-microservice-staticfiles:70c74a2-dirty-dev
+          ports:
+            - containerPort: 80
+  traffic:
+    - percent: 100
+      latestRevision: true

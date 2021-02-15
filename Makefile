@@ -20,8 +20,19 @@ push-test-image: test-image
 	docker tag ${NAME}:latest ${REGISTRY}/${NAME}:${TEST_IMAGE_VERSION}
 	docker push ${REGISTRY}/${NAME}:${TEST_IMAGE_VERSION}
 
+staticfiles-test-image:
+	docker build -f staticfiles.Dockerfile -t ${NAME}-staticfiles .
+
+push-staticfiles-test-image: staticfiles-test-image
+	docker tag ${NAME}-staticfiles:latest ${NAME}-staticfiles:${TEST_IMAGE_VERSION}
+	docker tag ${NAME}-staticfiles:latest ${REGISTRY}/${NAME}-staticfiles:${TEST_IMAGE_VERSION}
+	docker push ${REGISTRY}/${NAME}-staticfiles:${TEST_IMAGE_VERSION}
+
 deploy:
 	gcloud beta run services replace app.service.yaml --platform managed --region europe-west3
+
+deploy-staticfiles:
+	gcloud beta run services replace staticfiles.service.yaml --platform managed --region europe-west3
 
 collectstatic:
 	docker run --rm -e DJANGO_ENVIRONMENT='minimal' -v ${PROJECT_ROOT}/static:/app/app_microservice/app_microservice/static --entrypoint python ${NAME} manage.py collectstatic --no-input
