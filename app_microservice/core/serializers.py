@@ -2,6 +2,7 @@ import json
 
 # from google.auth.credentials import AnonymousCredentials
 from google.cloud import pubsub_v1
+from django.conf import settings
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -9,8 +10,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from core.choices import Breed
 
 from .models import Favorite, Offer, Subscription, User
-
-# from django.conf import settings
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,20 +26,21 @@ class OfferSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, data):
         recommend_data = json.dumps({"breed": data["breed"], "offerUrl": "test"})
 
-        # publisher = pubsub_v1.PublisherClient(credentials={})
+        publisher = pubsub_v1.PublisherClient()
 
         topic_path = publisher.topic_path(
-            # settings.PROJECT_ID, settings.TOPIC_ID
-            "wolke-sieben-fs",
-            "newOffer"
+            settings.PROJECT_ID, settings.TOPIC_ID
         )
         recommend_data = recommend_data.encode("utf-8")
-        # future = publisher.publish(topic_path, recommend_data)
-        # print(future.result())
+        try:
+            future = publisher.publish(topic_path, recommend_data)
+            future.result()
+            print(f"Published messages to {topic_path}.")
+            return super().create(data)
+        except Exception as e:
+            print(e)
+            return e, 500
 
-        print(f"Published messages to {topic_path}.")
-
-        return super().create(data)
 
     class Meta:
         model = Offer
