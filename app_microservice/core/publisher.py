@@ -1,35 +1,41 @@
 import json
-from typing import TypedDict
+from uuid import UUID
 
+# https://googleapis.dev/python/pubsub/latest/publisher/api/client.html
 from google.cloud import pubsub_v1
 
 from django.conf import settings
 
-project_id = settings.GCP_PROJECT_ID
-topic_name = settings.RECOMMENDER_BOT_TOPIC
+from core.serializers import OfferSerializer
 
+project_id = settings.GCP_PROJECT_ID
+
+# @TODO: fix for local testing
+# https://github.com/googleapis/python-pubsub/issues?q=GOOGLE_APPLICATION_CREDENTIALS
 publisher = pubsub_v1.PublisherClient()
 
+new_offer_topic_path = publisher.topic_path(
+    project_id, settings.RECOMMENDER_BOT_TOPIC
+)
 
-class OfferCreatedNotificationPayload(TypedDict):
-    breed: str
-    offer: str
+
+# https://stackoverflow.com/questions/36588126/uuid-is-not-json-serializable
+def uuid_convert(o):
+    if isinstance(o, UUID):
+        return o.hex
 
 
 def notify_offer_created(offer):
-    topic_path = publisher.topic_path(project_id, topic_name)
-
-    payload: OfferCreatedNotificationPayload = {
-        'breed': offer.breed,
-        'offer': str(offer.uuid)
-    }
-
-    serialized_payload = json.dumps(payload).encode('utf-8')
+    serialized_payload = json.dumps(
+        OfferSerializer(offer).data, default=uuid_convert
+    ).encode('utf-8')
 
     try:
-        future = publisher.publish(topic_path, serialized_payload)
+        future = publisher.publish(new_offer_topic_path, serialized_payload)
         future.result()
 
-        print(f"Published 'newOffer' message to topic: '{topic_path}'")
+        print(
+            f"Published 'newOffer' message to topic: '{new_offer_topic_path}'"
+        )
     except Exception as e:
         print(f"Failed to publish 'newOffer' message: '{e}'")

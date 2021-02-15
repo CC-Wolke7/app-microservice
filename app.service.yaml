@@ -19,9 +19,12 @@ spec:
           #   - "python manage.py migrate"
           #   - "python manage.py createsuperuser --noinput --email root@root.com --name root"
           #   - "python manage.py demo_db --remove"
+          #   - "python manage.py prepare_pubsub"
           ports:
             - containerPort: 8000
           env:
+            # - name: DJANGO_SUPERUSER_PASSWORD
+            #   value: "root"
             - name: DJANGO_ENVIRONMENT
               value: "production"
             - name: DJANGO_SECRET_KEY
