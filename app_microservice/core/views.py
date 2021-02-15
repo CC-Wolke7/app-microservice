@@ -1,5 +1,7 @@
 from google.auth.transport import requests
 from google.oauth2 import id_token
+import json
+from google.cloud import pubsub_v1
 
 from django.conf import settings
 from django.db import IntegrityError
@@ -186,6 +188,25 @@ class OfferViewSet(viewsets.ModelViewSet):
     serializer_class = OfferSerializer
     permission_classes = [OfferPermission]
     lookup_field = 'uuid'
+
+    def create(self, request, *args, **kwargs):
+        recommend_data = json.dumps(
+            {"breed": request.data["breed"], "offerUrl": "test"})
+
+        publisher = pubsub_v1.PublisherClient()
+
+        topic_path = publisher.topic_path(
+            settings.PROJECT_ID, settings.TOPIC_ID
+        )
+        recommend_data = recommend_data.encode("utf-8")
+        try:
+            future = publisher.publish(topic_path, recommend_data)
+            future.result()
+            print(f"Published messages to {topic_path}.")
+            return super().create(request.data)
+        except Exception as e:
+            print(e)
+            return e, 500
 
     def get_serializer_class(self):
         if self.action == "upload_image":
