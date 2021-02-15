@@ -1,76 +1,85 @@
-import json
+# import json
 
-# from google.auth.credentials import AnonymousCredentials
-from google.cloud import pubsub_v1
-from django.conf import settings
+# from django.conf import settings
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from core.choices import Breed
+from core.choices import BREEDS_FOR_SPECIES, Breed
 
 from .models import Favorite, Offer, Subscription, User
+
+# from google.auth.credentials import AnonymousCredentials
+# from google.cloud import pubsub_v1
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'url', 'uuid', 'name', 'email', 'is_staff', 'profile_image_name'
-        ]
+        fields = ['uuid', 'name', 'email', 'is_staff', 'profile_image_name']
         read_only_fields = ['uuid', "is_staff", "profile_image_name"]
-        extra_kwargs = {'url': {'lookup_field': 'uuid'}}
 
 
-class OfferSerializer(serializers.HyperlinkedModelSerializer):
-    def create(self, data):
-        recommend_data = json.dumps({"breed": data["breed"], "offerUrl": "test"})
-
-        publisher = pubsub_v1.PublisherClient()
-
-        topic_path = publisher.topic_path(
-            settings.PROJECT_ID, settings.TOPIC_ID
-        )
-        recommend_data = recommend_data.encode("utf-8")
-        try:
-            future = publisher.publish(topic_path, recommend_data)
-            future.result()
-            print(f"Published messages to {topic_path}.")
-            return super().create(data)
-        except Exception as e:
-            print(e)
-            return e, 500
-
+class OfferSerializer(serializers.ModelSerializer):
+    published_by = serializers.SlugRelatedField(
+        slug_field='uuid', queryset=User.objects.all()
+    )
 
     class Meta:
         model = Offer
         fields = [
-            'url', 'uuid', 'name', 'age', 'species', 'breed', 'sex', 'sterile',
+            'uuid', 'name', 'age', 'species', 'breed', 'sex', 'sterile',
             'description', 'date_published', 'location', 'published_by'
         ]
         read_only_fields = ['uuid', "date_published"]
-        extra_kwargs = {
-            'url': {
-                'lookup_field': 'uuid'
-            },
-            'published_by': {
-                'lookup_field': 'uuid'
-            }
-        }
+
+    def validate(self, data):
+        species = data["species"]
+        breed = data["breed"]
+
+        allowed_breeds = BREEDS_FOR_SPECIES[species]
+
+        if breed not in allowed_breeds:
+            raise serializers.ValidationError(
+                f"Breed '{breed}' does not belong to species '{species}'"
+            )
+
+        return data
+
+    # def create(self, data):
+    #     publisher = pubsub_v1.PublisherClient()
+
+    #     topic_path = publisher.topic_path(
+    #         settings.GCP_PROJECT_ID, settings.RECOMMENDER_BOT_TOPIC
+    #     )
+
+    #     recommend_data = json.dumps({
+    #         "breed": data["breed"],
+    #         "offerUrl": "test"
+    #     })
+    #     recommend_data = recommend_data.encode("utf-8")
+
+    #     try:
+    #         future = publisher.publish(topic_path, recommend_data)
+    #         future.result()
+    #         print(f"Published messages to {topic_path}.")
+    #         return super().create(data)
+    #     except Exception as e:
+    #         print(e)
+    #         return e, 500
 
 
-class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
+class FavoriteSerializer(serializers.ModelSerializer):
+    offer = serializers.SlugRelatedField(
+        slug_field='uuid', queryset=Offer.objects.all()
+    )
+    user = serializers.SlugRelatedField(
+        slug_field='uuid', queryset=User.objects.all()
+    )
+
     class Meta:
         model = Favorite
-        fields = ['url', 'user', 'offer']
-        extra_kwargs = {
-            'user': {
-                'lookup_field': 'uuid'
-            },
-            'offer': {
-                'lookup_field': 'uuid'
-            }
-        }
+        fields = ['user', 'offer']
 
 
 class CreateFavoriteSerializer(serializers.Serializer):
@@ -87,11 +96,14 @@ class SubscribeSerializer(serializers.Serializer):
     breed = serializers.ChoiceField(Breed.choices)
 
 
-class SubscriptionSerializer(serializers.HyperlinkedModelSerializer):
+class SubscriptionSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        slug_field='uuid', queryset=User.objects.all()
+    )
+
     class Meta:
         model = Subscription
-        fields = ['url', 'user', 'breed']
-        extra_kwargs = {'user': {'lookup_field': 'uuid'}}
+        fields = ['user', 'breed']
 
 
 class UploadOfferImageSerializer(serializers.Serializer):

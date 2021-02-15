@@ -1,5 +1,7 @@
 # App Microservice
 
+[![Deployment](https://github.com/cc-wolke7/app-microservice/workflows/Deployment/badge.svg)](https://github.com/CC-Wolke7/app-microservice/actions?query=workflow%3ADeployment)
+
 ## Development
 
 ### Docker
@@ -29,7 +31,7 @@ If you prefer not to develop with Docker, you can run the app natively on your s
 
 #### Dependencies:
 
-- [Python 3.7+](https://www.python.org/)
+- [Python 3.8+](https://www.python.org/)
 - [Pipenv](https://pipenv.readthedocs.io/en/latest/)
 - [MySQL](https://www.mysql.com/)
 
@@ -81,13 +83,23 @@ This project includes a GitHub workflow for deployment to Google Cloud Run. To d
 - `GCP_PROJECT_ID: <your-project>`
 - `GCP_SA_KEY: <JSON-contents-from-above>`
 
-5. Enable the Google Admin APIs
+5. Enable the [Google Cloud Run Admin API](https://console.developers.google.com/apis/api/run.googleapis.com)
 
-- [Cloud Run](https://console.developers.google.com/apis/api/run.googleapis.com)
-- [Cloud SQL](https://console.developers.google.com/apis/api/sqladmin.googleapis.com)
+6. Deploy via GitHub Actions
 
-6. Provision a new CloudSQL (MySQL v8) instance with a public IP and a database named `app_microservice`
+7. Allow public access via Cloud Run > `app-api` service > Permissions > Add > members: `allUsers` / role: `Cloud Run Invoker`
 
-7. Deploy via GitHub Actions (**Note:** initial deployment should be performed locally and use commented commands in `app.service.yaml`)
+## Persistence
 
-8. Allow public access via Cloud Run > `app-api` service > Permissions > Add > members: `allUsers` / role: `Cloud Run Invoker`
+This project relies on a relational database for permanently storing data. To provision such a database on Google Cloud:
+
+1. Enable the [Cloud SQL Admin API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com)
+
+2. Create a new Cloud SQL instance via: SQL > Create Instance > MySQL v8 with a public IP
+
+3. Create a new database via: SQL > Select previously created instance > Databases > Create database
+
+4. Update the `app.service.yaml` deployment specification accordingly:
+
+- Environment variables starting with `DJANGO_DATABASE_`
+- `run.googleapis.com/cloudsql-instances` metadata annotation

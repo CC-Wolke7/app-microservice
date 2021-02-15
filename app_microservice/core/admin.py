@@ -70,6 +70,8 @@ class OfferImageInline(admin.TabularInline):
 
     fields = ["name"]
 
+    extra = 0
+
 
 class OfferAdmin(admin.ModelAdmin):
     fields = [
