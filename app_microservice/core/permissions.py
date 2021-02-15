@@ -81,10 +81,10 @@ class ServiceAccountTokenReadWrite(permissions.BasePermission):
     This is useful for when we need another backend process to access a
     resource in the API.
 
-    Authentication requires a valid `Authentication` header.
+    Authentication requires a valid `Authorization` header.
     """
     def has_permission(self, request, view):
-        auth = request.headers.get('Authentication')
+        auth = request.headers.get('Authorization')
         token = smart_str(auth)
 
         return token in settings.SERVICE_TOKEN_WHITELIST
