@@ -196,7 +196,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         publisher = pubsub_v1.PublisherClient()
 
         topic_path = publisher.topic_path(
-            settings.PROJECT_ID, settings.TOPIC_ID
+            settings.GCP_PROJECT_ID, "newOffer"
         )
         recommend_data = recommend_data.encode("utf-8")
         try:
