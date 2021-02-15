@@ -9,6 +9,7 @@ spec:
     metadata:
       annotations:
         run.googleapis.com/cloudsql-instances: wolke-sieben-fs:europe-west3:app-storage
+        autoscaling.knative.dev/minScale: 1
     spec:
       containers:
         - image: gcr.io/$GCP_PROJECT_ID/$IMAGE_NAME:$IMAGE_VERSION # gcr.io/wolke-sieben-fs/app-microservice:70c74a2-dirty-dev
@@ -20,6 +21,10 @@ spec:
           #   - "python manage.py createsuperuser --noinput --email root@root.com --name root"
           #   - "python manage.py demo_db --remove"
           #   - "python manage.py prepare_pubsub"
+          resources:
+            limits:
+              cpu: 1
+              memory: 1500Mi
           ports:
             - containerPort: 8000
           env:
