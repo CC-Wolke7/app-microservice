@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['uuid', 'name', 'email', 'profile_image_name']
-        read_only_fields = ['uuid', "profile_image_name"]
+        read_only_fields = ['uuid', 'profile_image_name']
 
 
 class OfferSerializer(serializers.ModelSerializer):
@@ -31,11 +31,11 @@ class OfferSerializer(serializers.ModelSerializer):
             'uuid', 'name', 'age', 'species', 'breed', 'sex', 'sterile',
             'description', 'date_published', 'location', 'published_by'
         ]
-        read_only_fields = ['uuid', "date_published"]
+        read_only_fields = ['uuid', 'date_published']
 
     def validate(self, data):
-        species = data["species"]
-        breed = data["breed"]
+        species = data['species']
+        breed = data['breed']
 
         allowed_breeds = BREEDS_FOR_SPECIES[species]
 

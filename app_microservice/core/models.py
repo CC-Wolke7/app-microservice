@@ -60,7 +60,7 @@ class OfferImage(models.Model):
     name = models.CharField(max_length=255)
 
     class Meta:
-        unique_together = ["offer", "name"]
+        unique_together = ['offer', 'name']
 
 
 class Favorite(models.Model):
@@ -68,7 +68,7 @@ class Favorite(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ["user", "offer"]
+        unique_together = ['user', 'offer']
 
 
 class Subscription(models.Model):
@@ -76,4 +76,4 @@ class Subscription(models.Model):
     breed = models.CharField(max_length=255, choices=Breed.choices)
 
     class Meta:
-        unique_together = ["user", "breed"]
+        unique_together = ['user', 'breed']

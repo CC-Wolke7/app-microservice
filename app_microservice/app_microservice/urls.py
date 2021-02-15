@@ -37,7 +37,7 @@ urlpatterns = [
 
     # Admin
     path('internal/admin', admin.site.urls),
-    path("internal/docs/", include("app_microservice.docs_urls")),
+    path('internal/docs/', include('app_microservice.docs_urls')),
 ]
 
 # For local development convenience, serve static content directly from the

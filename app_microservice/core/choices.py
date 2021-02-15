@@ -2,7 +2,7 @@ from django.db import models
 
 
 class SocialLogin(models.TextChoices):
-    Google = "google"
+    Google = 'google'
 
 
 class Species(models.TextChoices):
@@ -10,21 +10,21 @@ class Species(models.TextChoices):
     CAT = 'Cat'
     SHARK = 'Shark'
     DINOSAUR = 'Dinosaur'
-    BIRD = "Bird"
-    SPIDER = "Spider"
+    BIRD = 'Bird'
+    SPIDER = 'Spider'
 
 
 class Breed(models.TextChoices):
     # Dog
     JACK_RUSSEL = 'Jack Russel'
-    WOLF = "Wolf"
-    MALTESER = "Malteser"
-    ENGLISH_COCKER_SPANIEL = "English Cocker Spaniel"
+    WOLF = 'Wolf'
+    MALTESER = 'Malteser'
+    ENGLISH_COCKER_SPANIEL = 'English Cocker Spaniel'
 
     # Cat
-    DOMESTIC_CAT = "Domestic Cat"
+    DOMESTIC_CAT = 'Domestic Cat'
     PERSIAN = 'Persian'
-    LION = "Lion"
+    LION = 'Lion'
 
     # Shark
     WHITE_SHARK = 'White Shark'
@@ -33,11 +33,11 @@ class Breed(models.TextChoices):
     KAWUK = 'Kawuk'
 
     # Bird
-    CHICKEN = "Chicken"
-    OWL = "Owl"
+    CHICKEN = 'Chicken'
+    OWL = 'Owl'
 
     # Spider
-    BLACK_WIDOW = "Black Widow"
+    BLACK_WIDOW = 'Black Widow'
 
 
 BREEDS_FOR_SPECIES = {

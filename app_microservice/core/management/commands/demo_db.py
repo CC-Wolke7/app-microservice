@@ -12,7 +12,7 @@ from core.bucket import delete_image, upload_image
 from core.choices import Breed, Sex, Species
 from core.models import Offer, OfferImage, User
 
-DATA_DIRECTORY = os.path.join(settings.BASE_DIR, "core", "management", "data")
+DATA_DIRECTORY = os.path.join(settings.BASE_DIR, 'core', 'management', 'data')
 
 
 class FileNotFoundError(Exception):
@@ -20,7 +20,7 @@ class FileNotFoundError(Exception):
 
 
 class Command(BaseCommand):
-    help = "Fill database with demo users and offers"
+    help = 'Fill database with demo users and offers'
 
     # Files should be put in adjacent `data` directory:
     #     - `data.json`
@@ -43,30 +43,30 @@ class Command(BaseCommand):
         self.import_offers(**options)
 
     def import_users(self, **options):
-        path = os.path.join(DATA_DIRECTORY, "users.json")
+        path = os.path.join(DATA_DIRECTORY, 'users.json')
 
         if not os.path.exists(path):
-            self.stdout.write(f"Could not find demo users file: {path}")
+            self.stdout.write(f'Could not find demo users file: {path}')
             return
 
-        self.stdout.write("Creating demo users...")
+        self.stdout.write('Creating demo users...')
         entries = self.parse_users_json(path)
         self.import_models(User, entries, **options)
-        self.stdout.write("\n")
+        self.stdout.write('\n')
 
     def import_offers(self, **options):
-        path = os.path.join(DATA_DIRECTORY, "offers.json")
+        path = os.path.join(DATA_DIRECTORY, 'offers.json')
 
         if not os.path.exists(path):
-            self.stdout.write(f"Could not find demo offers file: {path}")
+            self.stdout.write(f'Could not find demo offers file: {path}')
             return
 
-        self.stdout.write("Creating demo offers...")
+        self.stdout.write('Creating demo offers...')
         entries = self.parse_offers_json(path)
         self.import_models(Offer, entries, **options)
-        self.stdout.write("\n")
+        self.stdout.write('\n')
 
-        self.stdout.write("Uploading offer images...")
+        self.stdout.write('Uploading offer images...')
         self.import_offer_images(path)
 
     def import_offer_images(self, path: str):
@@ -74,19 +74,19 @@ class Command(BaseCommand):
             offers = json.load(json_file)
 
             for demo_offer in offers:
-                demo_offer_id = demo_offer.pop("id")
+                demo_offer_id = demo_offer.pop('id')
 
                 try:
                     stored_offer = Offer.objects.get(demo_id=demo_offer_id)
                 except Offer.DoesNotExist:
                     continue
 
-                image_name: str = demo_offer.pop("image")
-                image_path = os.path.join(DATA_DIRECTORY, "images", image_name)
+                image_name: str = demo_offer.pop('image')
+                image_path = os.path.join(DATA_DIRECTORY, 'images', image_name)
                 image = self.file_to_data_uri(image_path)
 
                 stored_image_name = (
-                    f"{str(stored_offer.uuid)}_offer_image_{image_name}"
+                    f'{str(stored_offer.uuid)}_offer_image_{image_name}'
                 )
 
                 upload_image(stored_image_name, image)
@@ -126,23 +126,23 @@ class Command(BaseCommand):
         conflicts = len(entries) - created
 
         self.stdout.write(
-            "\n".join([
-                self.style.HTTP_INFO(f"Parsed {len(entries)} JSON entries."),
-                self.style.SUCCESS(f"{created} records created.")
+            '\n'.join([
+                self.style.HTTP_INFO(f'Parsed {len(entries)} JSON entries.'),
+                self.style.SUCCESS(f'{created} records created.')
             ])
         )
 
         if conflicts:
             self.stdout.write(
-                self.style.NOTICE(f"Ignored {conflicts} conflicting records.")
+                self.style.NOTICE(f'Ignored {conflicts} conflicting records.')
             )
 
     def parse_users_json(self, path: str):
         def user_kwargs(item: dict) -> dict:
             return dict(
-                demo_id=item.pop("id"),
-                name=item.pop("name"),
-                email=item.pop("email"),
+                demo_id=item.pop('id'),
+                name=item.pop('name'),
+                email=item.pop('email'),
             )
 
         return self.parse_json(path, User, user_kwargs)
@@ -151,32 +151,32 @@ class Command(BaseCommand):
         def offer_kwargs(item: dict) -> Optional[dict]:
             # Get user
             try:
-                user = User.objects.get(demo_id=item.pop("sellerId"))
+                user = User.objects.get(demo_id=item.pop('sellerId'))
             except User.DoesNotExist:
                 return None
 
             # Parse to Species
-            species_str: str = item.pop("species")
+            species_str: str = item.pop('species')
             species = Species(species_str)
 
             # Parse to Breed
-            breed_str: str = item.pop("breed")
+            breed_str: str = item.pop('breed')
             breed = Breed(breed_str)
 
             # Parse to Sex
-            sex_str: str = item.pop("sex")
+            sex_str: str = item.pop('sex')
             sex = Sex(sex_str)
 
             return dict(
-                demo_id=item.pop("id"),
+                demo_id=item.pop('id'),
                 published_by=user,
-                name=item.pop("name"),
-                age=item.pop("age"),
+                name=item.pop('name'),
+                age=item.pop('age'),
                 species=species,
                 breed=breed,
                 sex=sex,
-                location=item.pop("location"),
-                description=item.pop("description")
+                location=item.pop('location'),
+                description=item.pop('description')
             )
 
         return self.parse_json(path, Offer, offer_kwargs)

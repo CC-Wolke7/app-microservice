@@ -64,7 +64,7 @@ class ServiceAccountTokenReadOnly(permissions.BasePermission):
     Authentication requires a valid `Authorization` header.
     """
     def has_permission(self, request, view):
-        auth = request.headers.get("Authorization")
+        auth = request.headers.get('Authorization')
         token = smart_str(auth)
 
         return all((
@@ -84,7 +84,7 @@ class ServiceAccountTokenReadWrite(permissions.BasePermission):
     Authentication requires a valid `Authentication` header.
     """
     def has_permission(self, request, view):
-        auth = request.headers.get("Authentication")
+        auth = request.headers.get('Authentication')
         token = smart_str(auth)
 
         return token in settings.SERVICE_TOKEN_WHITELIST

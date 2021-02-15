@@ -13,6 +13,9 @@ repos:
       - id: end-of-file-fixer
         name: Make sure files only end in a newline
         exclude: migrations
+      - id: double-quote-string-fixer
+        name: Use single quotes
+        exclude: migrations
   - repo: https://github.com/timothycrosley/isort
     rev: 5.2.2
     hooks:

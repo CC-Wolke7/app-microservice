@@ -1,7 +1,8 @@
-from google.auth.transport import requests
-from google.oauth2 import id_token
 import json
+
+from google.auth.transport import requests
 from google.cloud import pubsub_v1
+from google.oauth2 import id_token
 
 from django.conf import settings
 from django.db import IntegrityError
@@ -34,13 +35,13 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
 
     def get_serializer_class(self):
-        if self.action in ["favorite", "delete_favorite"]:
+        if self.action in ['favorite', 'delete_favorite']:
             return CreateFavoriteSerializer
 
-        if self.action == "upload_profile_image":
+        if self.action == 'upload_profile_image':
             return UploadImageSerializer
 
-        if self.action in ["subscription", "delete_subscription"]:
+        if self.action in ['subscription', 'delete_subscription']:
             return SubscribeSerializer
 
         return self.serializer_class
@@ -49,7 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True)
     def get_offers(self, request, *args, **kwargs):
         offer_uuids = Offer.objects.filter(published_by=self.get_object()
-                                           ).values_list("uuid", flat=True)
+                                           ).values_list('uuid', flat=True)
 
         return Response(offer_uuids, status=status.HTTP_200_OK)
 
@@ -58,7 +59,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_favorites(self, request, *args, **kwargs):
         offer_uuids = Favorite.objects.filter(
             user=self.get_object()
-        ).values_list("offer__uuid", flat=True)
+        ).values_list('offer__uuid', flat=True)
 
         return Response(offer_uuids, status=status.HTTP_200_OK)
 
@@ -116,7 +117,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
 
         image = request.data['image']
-        profile_image_name = f"{str(user.uuid)}_profile_image"
+        profile_image_name = f'{str(user.uuid)}_profile_image'
 
         if user.profile_image_name:
             delete_image(user.profile_image_name)
@@ -146,7 +147,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True)
     def get_subscriptions(self, request, *args, **kwargs):
         breeds = Subscription.objects.filter(user=self.get_object()
-                                             ).values_list("breed", flat=True)
+                                             ).values_list('breed', flat=True)
 
         return Response(breeds, status=status.HTTP_200_OK)
 
@@ -189,28 +190,27 @@ class OfferViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
 
     def create(self, request, *args, **kwargs):
-        recommend_data = json.dumps(
-            {"breed": request.data["breed"], "offerUrl": "test"})
+        recommend_data = json.dumps({
+            'breed': request.data['breed'],
+            'offerUrl': 'test'
+        })
 
         publisher = pubsub_v1.PublisherClient()
 
-        topic_path = publisher.topic_path(
-            settings.GCP_PROJECT_ID, "newOffer"
-        )
-        recommend_data = recommend_data.encode("utf-8")
+        topic_path = publisher.topic_path(settings.GCP_PROJECT_ID, 'newOffer')
+        recommend_data = recommend_data.encode('utf-8')
         try:
             future = publisher.publish(topic_path, recommend_data)
             future.result()
-            print(f"Published messages to {topic_path}.")
+            print(f'Published messages to {topic_path}.')
 
         except Exception as e:
             print(e)
 
         return super().create(request)
 
-
     def get_serializer_class(self):
-        if self.action in ["upload_image", "delete_image"]:
+        if self.action in ['upload_image', 'delete_image']:
             return UploadImageSerializer
 
         return self.serializer_class
@@ -236,7 +236,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         image = request.data['image']
 
         image_name = request.data['name']
-        stored_image_name = f"{offer_uuid}_offer_image_{image_name}"
+        stored_image_name = f'{offer_uuid}_offer_image_{image_name}'
 
         upload_image(stored_image_name, image)
 
@@ -259,7 +259,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         offer_uuid = str(offer.uuid)
 
         image_name = request.data['name']
-        stored_image_name = f"{offer_uuid}_offer_image_{image_name}"
+        stored_image_name = f'{offer_uuid}_offer_image_{image_name}'
 
         try:
             offer_image = OfferImage.objects.get(
@@ -282,11 +282,11 @@ class SubscribersView(APIView):
         query_serializer = SubscribersQuery(data=request.query_params)
         query_serializer.is_valid(raise_exception=True)
 
-        breed = query_serializer.data["breed"]
+        breed = query_serializer.data['breed']
 
         user_uuids = Subscription.objects.filter(
             breed=breed
-        ).values_list("user__uuid", flat=True)
+        ).values_list('user__uuid', flat=True)
 
         return Response(user_uuids, status=status.HTTP_200_OK)
 
@@ -298,7 +298,7 @@ class SpeciesView(APIView):
         query_serializer = BreedsQuery(data=request.query_params)
         query_serializer.is_valid(raise_exception=True)
 
-        species = query_serializer.data.get("species")
+        species = query_serializer.data.get('species')
 
         result = []
 
@@ -375,15 +375,15 @@ class GoogleIdTokenLoginView(APIView):
         except:  # noqa
             raise exceptions.NotAuthenticated()
 
-        user_id = google_id["sub"]
+        user_id = google_id['sub']
 
         try:
             user = User.objects.all().get(
                 external_id=user_id, signup_method='google'
             )
         except User.DoesNotExist:
-            name = google_id.get("name")
-            email = google_id.get("email")
+            name = google_id.get('name')
+            email = google_id.get('email')
 
             if not name or not email:
                 raise exceptions.AuthenticationFailed(
