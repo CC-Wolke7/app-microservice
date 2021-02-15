@@ -8,8 +8,8 @@ bucket_name = settings.GCP_BUCKET
 
 options = dict(project=project_id)
 
-if settings.ENVIRONMENT != "production":
-    options["credentials"] = AnonymousCredentials()
+if settings.ENVIRONMENT != 'production':
+    options['credentials'] = AnonymousCredentials()
 
 client = storage.Client(**options)
 
