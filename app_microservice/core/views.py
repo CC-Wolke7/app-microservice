@@ -15,6 +15,7 @@ from rest_framework_simplejwt.settings import api_settings as jwt_settings
 
 from .bucket import delete_image, download_image, upload_image
 from .choices import BREEDS_FOR_SPECIES, Species
+from .filters import BreedsQuery, SubscribersQuery
 from .models import Favorite, Offer, OfferImage, Subscription, User
 from .permissions import (
     OfferCreatorOrAdminModifyAuthenticatedCreate, ServiceAccountTokenReadOnly,
@@ -278,8 +279,13 @@ class SubscribersView(APIView):
     permission_classes = [ServiceAccountTokenReadOnly]
 
     def get(self, request, format=None):
+        query_serializer = SubscribersQuery(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+
+        breed = query_serializer.data["breed"]
+
         user_uuids = Subscription.objects.filter(
-            breed=request.query_params['breed']
+            breed=breed
         ).values_list("user__uuid", flat=True)
 
         return Response(user_uuids, status=status.HTTP_200_OK)
@@ -289,12 +295,18 @@ class SpeciesView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
-        species = request.query_params['species']
+        query_serializer = BreedsQuery(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+
+        species = query_serializer.data.get("species")
+
         result = []
 
-        if species == 'all':
+        if not species:
+            # return all species
             result = Species.values
         else:
+            # return breeds for species
             result = BREEDS_FOR_SPECIES[species]
 
         if not result:
