@@ -10,13 +10,15 @@ from core.serializers import OfferSerializer
 
 project_id = settings.GCP_PROJECT_ID
 
-# @TODO: fix for local testing
-# https://github.com/googleapis/python-pubsub/issues?q=GOOGLE_APPLICATION_CREDENTIALS
-publisher = pubsub_v1.PublisherClient()
 
-new_offer_topic_path = publisher.topic_path(
-    project_id, settings.RECOMMENDER_BOT_TOPIC
-)
+def get_publisher():
+    # @TODO: fix for local testing
+    # https://github.com/googleapis/python-pubsub/issues?q=GOOGLE_APPLICATION_CREDENTIALS
+    return pubsub_v1.PublisherClient()
+
+
+def get_new_offer_topic_path(publisher):
+    return publisher.topic_path(project_id, settings.RECOMMENDER_BOT_TOPIC)
 
 
 # https://stackoverflow.com/questions/36588126/uuid-is-not-json-serializable
@@ -31,6 +33,9 @@ def notify_offer_created(offer):
     ).encode('utf-8')
 
     try:
+        publisher = get_publisher()
+        new_offer_topic_path = get_new_offer_topic_path(publisher)
+
         future = publisher.publish(new_offer_topic_path, serialized_payload)
         future.result()
 
