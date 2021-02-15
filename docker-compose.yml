@@ -32,7 +32,7 @@ services:
       RECOMMENDER_BOT_TOKEN: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
       RECOMMENDER_BOT_TOPIC: "newOffer"
       STORAGE_EMULATOR_HOST: "http://gcp-storage:8080"
-      PUBSUB_EMULATOR_HOST:  "http://pubsub:8085"
+      PUBSUB_EMULATOR_HOST: "http://pubsub:8085"
     command: --reload --log-level=info
 
   # ----
@@ -56,9 +56,11 @@ services:
     command: -scheme http -port 8080
 
   # ----
-  # PubSub Emulator
+  # Google Cloud PubSub
+  # curl http://localhost:8080/storage/v1/b/
+  # curl http://localhost:8080/storage/v1/b/app-media-bucket/o
   pubsub:
     image: google/cloud-sdk:emulators
-    ports:
-      - 8085:8085
+    expose:
+      - 8085
     entrypoint: /bin/bash -c "gcloud config set project vet-shelter && /google-cloud-sdk/platform/pubsub-emulator/bin/cloud-pubsub-emulator --host=0.0.0.0 --port=8085"
