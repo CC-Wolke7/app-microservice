@@ -8,6 +8,7 @@ env:
   GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
   IMAGE_NAME: app-microservice
   IMAGE_VERSION: ${{ github.sha }}
+  STATIC_FILES_BUCKET: app-api-staticfiles
 
 jobs:
   deploy:
@@ -39,12 +40,19 @@ jobs:
 
       - name: Build and push container image to Google Cloud Registry
         run: |
-          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} .
+          docker build -t ${{ env.IMAGE_NAME }} .
+          docker tag ${{ env.IMAGE_NAME }}:latest gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}
           docker push gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}
 
       - name: Collect static files
         run: |
           docker run --rm -e DJANGO_ENVIRONMENT='minimal' -v $(pwd)/static:/app/app_microservice/app_microservice/static --entrypoint python ${{ env.IMAGE_NAME }} manage.py collectstatic --no-input
+
+      - name: Upload static files
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          path: ./static
+          destination: ${{ env.STATIC_FILES_BUCKET }}
 
       - name: Update deployment specification
         uses: danielr1996/envsubst-action@1.0.0
