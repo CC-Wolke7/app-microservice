@@ -45,7 +45,7 @@ spec:
             - name: GOOGLE_OAUTH_AUDIENCE
               value: "481332583913-cieg25daahj0ujclj002o0ei5der0rsi.apps.googleusercontent.com"
             - name: RECOMMENDER_BOT_TOKEN
-              value: "NTZiYWU4YjE1ZmQyYzdlMGViZDI1Y2EzODMzZTUxZjQK"
+              value: "NWYyNWI4MjVjMjc0ZmRjZWI1ZWFhYmQ4M2JlMzJiNzEK"
             - name: RECOMMENDER_BOT_TOPIC
               value: "newOffer"
   traffic:
