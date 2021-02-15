@@ -14,7 +14,7 @@ google-auth = "*"
 mysqlclient = "*"
 djangorestframework-simplejwt = "*"
 google-cloud-storage = "*"
-google-cloud-pubsub = "*"
+google-cloud-pubsub = "~=2.2.0"
 django-filter = "*"
 
 [dev-packages]
