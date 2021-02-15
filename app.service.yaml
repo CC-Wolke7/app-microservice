@@ -18,6 +18,7 @@ spec:
           #   - -c
           #   - "python manage.py migrate"
           #   - "python manage.py createsuperuser --noinput --email root@root.com --name root"
+          #   - "python manage.py demo_db --remove"
           ports:
             - containerPort: 8000
           env:
