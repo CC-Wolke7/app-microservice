@@ -5,7 +5,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from core.choices import Breed
+from core.choices import BREEDS_FOR_SPECIES, Breed
 
 from .models import Favorite, Offer, Subscription, User
 
@@ -32,6 +32,19 @@ class OfferSerializer(serializers.ModelSerializer):
             'description', 'date_published', 'location', 'published_by'
         ]
         read_only_fields = ['uuid', "date_published"]
+
+    def validate(self, data):
+        species = data["species"]
+        breed = data["breed"]
+
+        allowed_breeds = BREEDS_FOR_SPECIES[species]
+
+        if breed not in allowed_breeds:
+            raise serializers.ValidationError(
+                f"Breed '{breed}' does not belong to species '{species}'"
+            )
+
+        return data
 
     # def create(self, data):
     #     publisher = pubsub_v1.PublisherClient()
