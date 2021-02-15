@@ -203,10 +203,12 @@ class OfferViewSet(viewsets.ModelViewSet):
             future = publisher.publish(topic_path, recommend_data)
             future.result()
             print(f"Published messages to {topic_path}.")
-            return super().create(request.data)
+
         except Exception as e:
             print(e)
-            return e, 500
+
+        return super().create(request.data)
+
 
     def get_serializer_class(self):
         if self.action == "upload_image":
