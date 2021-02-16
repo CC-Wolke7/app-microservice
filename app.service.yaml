@@ -37,7 +37,7 @@ spec:
             - name: DJANGO_SECRET_KEY
               value: "OGFhMjM1M2U0MzM5ZTNkMTI5NTgwMTViOTE3ODkyNjc5NWViZjUwMTUzYWNhMTU0Cg=="
             - name: DJANGO_ACCESS_TOKEN_LIFETIME
-              value: 1440 # in minutes (= 1 day)
+              value: "1440" # in minutes (= 1 day)
             - name: DJANGO_DATABASE_NAME
               value: "app_microservice"
             - name: DJANGO_DATABASE_USER
