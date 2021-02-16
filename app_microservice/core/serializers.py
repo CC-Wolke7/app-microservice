@@ -1,16 +1,9 @@
-# import json
-
-# from django.conf import settings
-
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from core.choices import BREEDS_FOR_SPECIES, Breed
 
 from .models import Favorite, Offer, Subscription, User
-
-# from google.auth.credentials import AnonymousCredentials
-# from google.cloud import pubsub_v1
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -45,28 +38,6 @@ class OfferSerializer(serializers.ModelSerializer):
             )
 
         return data
-
-    # def create(self, data):
-    #     publisher = pubsub_v1.PublisherClient()
-
-    #     topic_path = publisher.topic_path(
-    #         settings.GCP_PROJECT_ID, settings.RECOMMENDER_BOT_TOPIC
-    #     )
-
-    #     recommend_data = json.dumps({
-    #         "breed": data["breed"],
-    #         "offerUrl": "test"
-    #     })
-    #     recommend_data = recommend_data.encode("utf-8")
-
-    #     try:
-    #         future = publisher.publish(topic_path, recommend_data)
-    #         future.result()
-    #         print(f"Published messages to {topic_path}.")
-    #         return super().create(data)
-    #     except Exception as e:
-    #         print(e)
-    #         return e, 500
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
