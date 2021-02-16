@@ -2,6 +2,8 @@
 
 [![Deployment](https://github.com/cc-wolke7/app-microservice/workflows/Deployment/badge.svg)](https://github.com/CC-Wolke7/app-microservice/actions?query=workflow%3ADeployment)
 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/5fab15651e517626a7a6)
+
 ## Development
 
 ### Docker
