@@ -13,7 +13,7 @@ from pathlib import Path
 from .helper import getenv, netloc
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, "subdir")
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # When Debug is enabled, Django will give detailed stack traces when there is
