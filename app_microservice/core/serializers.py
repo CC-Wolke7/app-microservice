@@ -16,7 +16,7 @@ from .models import Favorite, Offer, Subscription, User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['uuid', 'name', 'email', 'profile_image_name']
+        fields = ['uuid', 'name', 'email', 'profile_image_name', 'description']
         read_only_fields = ['uuid', 'profile_image_name']
 
 
