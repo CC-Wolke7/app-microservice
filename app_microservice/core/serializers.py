@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class OfferSerializer(serializers.ModelSerializer):
     published_by = serializers.SlugRelatedField(
-        slug_field='uuid', queryset=User.objects.all()
+        slug_field='uuid', read_only=True
     )
 
     class Meta:
@@ -24,7 +24,7 @@ class OfferSerializer(serializers.ModelSerializer):
             'uuid', 'name', 'age', 'species', 'breed', 'sex', 'sterile',
             'description', 'date_published', 'location', 'published_by'
         ]
-        read_only_fields = ['uuid', 'date_published']
+        read_only_fields = ['uuid', 'date_published', 'published_by']
 
     def validate(self, data):
         species = data['species']
