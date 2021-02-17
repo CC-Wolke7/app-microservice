@@ -192,6 +192,9 @@ class OfferViewSet(viewsets.ModelViewSet):
 
         return self.serializer_class
 
+    def perform_create(self, serializer):
+        serializer.save(published_by=self.request.user)
+
     # Images
     @action(detail=True)
     def get_images(self, request, *args, **kwargs):
